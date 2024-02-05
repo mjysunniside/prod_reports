@@ -1,0 +1,5 @@
+note that the format of zoho dates appears to be yyyy-mm-dd
+i should be able to simply get that from the list of parameter and pass to new Date(ptoDate)
+
+
+another thing to note is that i will need the following in the request from zohoCRM: zoho opportunity ID, PTO date, monitoring id, possibly inverter manufacturer (verify which monitoring platform), ALL PTO fields (to verify correct year and update any missing), estimated production
