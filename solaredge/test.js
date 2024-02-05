@@ -1,6 +1,7 @@
 const axios = require('axios')
+require('dotenv').config({path: 'solarEdge.env'})
 
-const API_ACCOUNT_TOKEN = '7BUPHYY5GQMTW9HR7MQA8RUK3LG3RAUA'
+const API_ACCOUNT_TOKEN = process.env.SOLAREDGE_API_KEY
 siteId = '1671510'
 startDate = '2022-10-16'
 endDate = '2022-10-07'
@@ -12,7 +13,7 @@ const getEndDate = (startDate) => {
     console.log(date1.getDate())
 }
 
-getEndDate(startDate)
+// getEndDate(startDate)
 
 const requestURL = `https://monitoringapi.solaredge.com/site/${siteId}/energy?timeUnit=DAY&endDate=${endDate}&startDate=${startDate}&api_key=${API_ACCOUNT_TOKEN}`
 
@@ -25,9 +26,9 @@ const requestURL = `https://monitoringapi.solaredge.com/site/${siteId}/energy?ti
 
 
 // get all sites
-// axios.get(`https://monitoringapi.solaredge.com/sites/list?size=20&&sortProperty=name&sortOrder=ASC&api_key=${API_ACCOUNT_TOKEN}`)
-//     .then(res => console.log(res.data.sites))
-//     .catch(err => console.log(err))
+axios.get(`https://monitoringapi.solaredge.com/sites/list?size=20&&sortProperty=name&sortOrder=ASC&api_key=${API_ACCOUNT_TOKEN}`)
+    .then(res => console.log(res.data.sites))
+    .catch(err => console.log(err))
 
 
 
