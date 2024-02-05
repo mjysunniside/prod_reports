@@ -1,5 +1,5 @@
 const axios = require('axios')
-require('dotenv').config({path: 'solarEdge.env'})
+require('dotenv').config({path: './sEd.env'})
 
 const API_ACCOUNT_TOKEN = process.env.SOLAREDGE_API_KEY
 siteId = '1671510'
