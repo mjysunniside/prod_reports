@@ -1,5 +1,5 @@
 const axios = require('axios')
-require('dotenv').config({path: 'solarEdge.env'})
+require('dotenv').config({path: './edge.env'})
 
 const API_ACCOUNT_TOKEN = process.env.SOLAREDGE_API_KEY
 
@@ -12,7 +12,7 @@ const PRODUCTION_TOTALS = {
 }
 
 
-const verifyCurrentProductionYear = (ptoDate, currentProductionTotals) => {
+const getCurrentProductionYear = (ptoDate, currentProductionTotals) => {
     const nullIndexArray = []
     const zeroIndexArray = []
     for(const [key, value] of Object.entries(currentProductionTotals)) {
@@ -36,10 +36,10 @@ const verifyCurrentProductionYear = (ptoDate, currentProductionTotals) => {
     // have to subtract 1 because the returnYears from getFullYearsSincePTO returns a zero indexed array (year 1 is at position 0)
     yearStartAndEndArray = fullYearsObject[yearNumber-1]
 
-    console.log(yearStartAndEndArray)
+    
 
 
-    return {nullIndexArray, zeroIndexArray}
+    return yearStartAndEndArray
 }
 
 const getFullYearsSincePTO = (ptoDate) => {
@@ -73,14 +73,14 @@ const getAYearFromDate = (date) => {
     return yearAwayDate
 }
 
-verifyCurrentProductionYear(PTO_DATE, PRODUCTION_TOTALS)
+getCurrentProductionYear(PTO_DATE, PRODUCTION_TOTALS)
 
 
 
 
 //return {value:year production, nullCount: count of null dates}
-const getYearData = (siteId, ptoDate, ) => {
-    const endDate = getEndDate(startDate)
+const getYearData = (siteId, ptoDate) => {
+    const dateStrings = getCurrentProductionYear(ptoDate)
     const MAIN_REQUEST_URL = `https://monitoringapi.solaredge.com/site/${siteId}/energy?timeUnit=DAY&endDate=${endDate}&startDate=${startDate}&api_key=${API_ACCOUNT_TOKEN}`
 }
 
