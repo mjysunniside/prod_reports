@@ -3,3 +3,17 @@ i should be able to simply get that from the list of parameter and pass to new D
 
 
 another thing to note is that i will need the following in the request from zohoCRM: zoho opportunity ID, PTO date, monitoring id, possibly inverter manufacturer (verify which monitoring platform), ALL PTO fields (to verify correct year and update any missing), estimated production
+
+
+another note is that regarding cases in which for some reason PTO and production do not allign, this will not currently be apparent from the script. Should I really work on making this functionality, if so leadership needs to give me examples of how they want to respond to these situations (automated email, check again later--this would be the more complicated option? etc).
+
+zoho code:
+requestObj = crmAPIRequest.toMap();
+requestBody = requestObj.get("body");
+zohoId = requestBody.get("zohoId").toNumber();
+value = requestBody.get("value").toNumber();
+year = requestBody.get("year");
+updateFieldString = "Year_" + year + "_Production";
+updateInfo = {updateFieldString:value};
+response = zoho.crm.updateRecord("Leads",zohoId,updateInfo);
+return {"obj ":response};
