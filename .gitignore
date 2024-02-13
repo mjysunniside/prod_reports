@@ -1,5 +1,7 @@
 # env
 **/*.env
+# token files
+**/*token*
 
 # Logs
 logs
