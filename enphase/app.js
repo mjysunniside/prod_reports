@@ -32,19 +32,30 @@ const enphaseURL = `https://api.enphaseenergy.com/oauth/token?grant_type=passwor
 
 // console.log(`Bearer ${tokens['ACCESS_TOKEN']}`)
 // get all systems (max 100, pages in query)
-axios.get(`https://api.enphaseenergy.com/api/v4/systems/?key=${process.env.API_KEY_ENPHASE}`, {headers: {
-  'Authorization': `Bearer ${access_token}`
-}})
-  .then(res => console.log(res.data))
-  .catch(error => console.log(error))
+// axios.get(`https://api.enphaseenergy.com/api/v4/systems/?key=${process.env.API_KEY_ENPHASE}`, {headers: {
+//   'Authorization': `Bearer ${access_token}`
+// }})
+//   .then(res => console.log(res.data))
+//   .catch(error => console.log(error))
 
 
+const SITE_ID = '2109343'
+const START_DATE = '2022-01-27'
+const END_DATE = '2023-01-27'
 
 //one site
-// axios.get(`https://api.enphaseenergy.com/api/v4/systems/2686066/summary?key=${process.env.API_KEY_ENPHASE}` , null, {headers: {
-//   'Authorization': `Bearer ${tokens['ACCESS_TOKEN']}`
-// }})
+axios.get(`https://api.enphaseenergy.com/api/v4/systems/${SITE_ID}/energy_lifetime?key=${process.env.API_KEY_ENPHASE}&start_date=${START_DATE}&end_date=${END_DATE}` , {headers: {
+  'Authorization': `Bearer ${access_token}`
+}})
+  .then(res => {
+    const productionArray = res.data.production
+    const sum = productionArray.reduce((accumulator, currentValue) => {
+      return accumulator+=(currentValue/1000)
+    }, 0)
+    console.log(`The sum is:\t${sum}`)
 
+  })
+  .catch(error => console.log(error))
 
 
 
