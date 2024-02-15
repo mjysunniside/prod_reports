@@ -1,62 +1,103 @@
-require("dotenv").config({path: "./enphase.env"})
+require("dotenv").config()
+// require("dotenv").config({ path: "./enphase.env" })
 const fs = require('fs')
 const axios = require("axios")
-const tokens = require('./tokenInfo.json')
+const tokens = require('./tokens.json')
+
 
 const access_token = tokens['access_token']
 const refresh_token = `${tokens['refresh_token']}`
 
-client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
-client_id_enphase = process.env.CLIENT_ID_ENPHASE
-id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
-encodedValue = Buffer.from(id_secret_toEncode_enphase).toString('base64')
 
 
 
-const enphaseURL = `https://api.enphaseenergy.com/oauth/token?grant_type=password&username=${process.env.USERNAME_ENPHASE}&password=${process.env.PASSWORD_ENPHASE}`
 
-// Getting oauth tokens
-// axios.post(enphaseURL, null, {headers: {
-//     'Authorization': `Basic ${encodedValue}`
-//   }})
-//     .then(res =>{ 
-//       fs.writeFileSync("./tokenInfo.json", JSON.stringify(res.data))
-//     })
-//     .catch(error => console.log(error))
-
-//refresh token
-// axios.get(`https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=${refresh_token}`, {headers: {
-//   'Authorization': `Basic ${encodedValue}`
-// }})
+// const SITE_ID = '2109343'
+// const START_DATE = '2022-01-27'
+// const END_DATE = '2023-01-27'
 
 
-// console.log(`Bearer ${tokens['ACCESS_TOKEN']}`)
-// get all systems (max 100, pages in query)
-// axios.get(`https://api.enphaseenergy.com/api/v4/systems/?key=${process.env.API_KEY_ENPHASE}`, {headers: {
-//   'Authorization': `Bearer ${access_token}`
-// }})
-//   .then(res => console.log(res.data))
-//   .catch(error => console.log(error))
 
+const getAuthTokensEnphase = async () => {
+  client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
+  client_id_enphase = process.env.CLIENT_ID_ENPHASE
+  id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
+  encodedIdSecret = Buffer.from(id_secret_toEncode_enphase).toString('base64')
 
-const SITE_ID = '2109343'
-const START_DATE = '2022-01-27'
-const END_DATE = '2023-01-27'
-
-//one site
-axios.get(`https://api.enphaseenergy.com/api/v4/systems/${SITE_ID}/energy_lifetime?key=${process.env.API_KEY_ENPHASE}&start_date=${START_DATE}&end_date=${END_DATE}` , {headers: {
-  'Authorization': `Bearer ${access_token}`
-}})
-  .then(res => {
-    const productionArray = res.data.production
-    const sum = productionArray.reduce((accumulator, currentValue) => {
-      return accumulator+=(currentValue/1000)
-    }, 0)
-    console.log(`The sum is:\t${sum}`)
-
+  await axios.post(enphaseURL, null, {
+    headers: {
+      'Authorization': `Basic ${encodedIdSecret}`
+    }
   })
-  .catch(error => console.log(error))
+    .then(res => {
+      fs.writeFileSync("./tokenInfo.json", JSON.stringify(res.data))
+    })
+
+}
+
+const refreshEnphase = async () => {
+  const REFRESH_URL_ENPHASE = `https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=${refresh_token}`
+  client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
+  client_id_enphase = process.env.CLIENT_ID_ENPHASE
+  id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
+  encodedIdSecret = Buffer.from(id_secret_toEncode_enphase).toString('base64')
+
+  await axios.post(REFRESH_URL_ENPHASE, null, {
+    headers: {
+      'Authorization': `Basic ${encodedIdSecret}`
+    }
+  })
+    .then(res => {
+      if (res?.data?.access_token) {
+        fs.writeFileSync("./tokens.json", JSON.stringify(res.data))
+      } else {
+        throw new Error("Error in refresh function")
+      }
+    })
 
 
 
-// axios.post("https://eo1qwfm6vio6dnw.m.pipedream.net",null, {headers: {'Authorization': `Basic xecp499`}})
+}
+
+const fetchEnphase = async (siteId, startDate, endDate) => {
+  let data;
+  const MAIN_ENPHASE_REQUEST_URL = `https://api.enphaseenergy.com/api/v4/systems/${siteId}/energy_lifetime?key=${process.env.API_KEY_ENPHASE}&start_date=${startDate}&end_date=${endDate}&production=all`
+  const res = await axios.get(MAIN_ENPHASE_REQUEST_URL, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`
+    }
+  })
+    .catch(error => console.log(error))
+
+  let dateObj = new Date(startDate)
+  let production = res.data.production.map((value, index) => {
+    const dateObj = new Date(startDate);
+    dateObj.setDate(dateObj.getDate() + index);
+    return {
+      date: dateObj,
+      value: (value / 1000)
+    }
+  })
+  data = production
+  // console.log(data)
+
+  return await data
+}
+
+const fetchAllSitesEnphase = () => {
+  axios.get(`https://api.enphaseenergy.com/api/v4/systems/?key=${process.env.API_KEY_ENPHASE}`, {
+    headers: {
+      'Authorization': `Bearer ${access_token}`
+    }
+  })
+    .then(res => console.log(res.data))
+    .catch(error => console.log(error))
+}
+
+
+// console.log(fetchEnphase(SITE_ID, START_DATE, END_DATE))
+// fetchAllSitesEnphase()
+// refreshEnphase()
+
+
+module.exports = {fetchEnphase, fetchAllSitesEnphase}

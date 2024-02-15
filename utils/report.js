@@ -1,10 +1,12 @@
 const {fetchSolarEdge} = require('../solaredge/app')
+const {fetchEnphase} = require('../enphase/app')
 
 //return {value:year production, nullCount: count of null dates}
 const getYearData = async (siteId, ptoDate, productionYearsArray, monitoring_company) => {
     try {
         const [startDate, endDate] = getCurrentProductionYear(ptoDate, productionYearsArray)
         const data = await fetchData(siteId, startDate, endDate, monitoring_company)
+        // console.log(data)
 
         const finalSum = data.reduce(
             (accumulator, currentValue) => {
@@ -12,14 +14,15 @@ const getYearData = async (siteId, ptoDate, productionYearsArray, monitoring_com
                 if (currentValue.value == null || currentValue.value === undefined || currentValue.value === 0) {
                     accumulator.nullAndUndefinedAndZeroCount += 1
                 } else {
-                    accumulator.sum += (currentValue.value / 1000)
+                    accumulator.sum += (currentValue.value)
                 }
                 return accumulator
             },
             { sum: 0, nullAndUndefinedAndZeroCount: 0 },
         );
-        console.log("the year period is: " + startDate + " to " + endDate)
-        console.log("the total produced is: " + Math.round(finalSum.sum) + ".kWh")
+        // console.log("the year period is: " + startDate + " to " + endDate)
+        // console.log("the total produced is: " + Math.round(finalSum.sum) + ".kWh")
+        return await {startDate, endDate, finalSum}
 
     } catch (error) {
         console.log(error)
@@ -29,14 +32,13 @@ const getYearData = async (siteId, ptoDate, productionYearsArray, monitoring_com
 const fetchData = async (siteId, startDate, endDate, monitoring_company) => {
     let data;
     if (monitoring_company === "solaredge") {
-        const MAIN_SOLAREDGE_REQUEST_URL = `https://monitoringapi.solaredge.com/site/${siteId}/energy?timeUnit=DAY&endDate=${endDate}&startDate=${startDate}&api_key=${API_ACCOUNT_TOKEN}`
         data = await fetchSolarEdge(siteId, startDate, endDate)
 
     } else if (monitoring_company === "enphase") {
-
+        data = await fetchEnphase(siteId, startDate, endDate)
     }
 
-    return data
+    return await data
 }
 
 const getCurrentProductionYear = (ptoDate, currentProductionTotals) => {
