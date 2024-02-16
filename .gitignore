@@ -2,6 +2,8 @@
 **/*.env
 # token files
 **/*token*
+# ds store
+**/.DS_Store
 
 # Logs
 logs

@@ -2,9 +2,10 @@ const {fetchSolarEdge} = require('../solaredge/app')
 const {fetchEnphase} = require('../enphase/app')
 
 //return {value:year production, nullCount: count of null dates}
-const getYearData = async (siteId, ptoDate, productionYearsArray, monitoring_company) => {
+const getYearData = async (siteId, ptoDate, year, monitoring_company, clientName) => {
+    console.log(`in the get year function site id is: ${siteId}`)
     try {
-        const [startDate, endDate] = getCurrentProductionYear(ptoDate, productionYearsArray)
+        const [startDate, endDate] = getProductionYear(ptoDate, year)
         const data = await fetchData(siteId, startDate, endDate, monitoring_company)
         // console.log(data)
 
@@ -22,10 +23,16 @@ const getYearData = async (siteId, ptoDate, productionYearsArray, monitoring_com
         );
         // console.log("the year period is: " + startDate + " to " + endDate)
         // console.log("the total produced is: " + Math.round(finalSum.sum) + ".kWh")
-        return await {startDate, endDate, finalSum}
+        return await {startDate, endDate, finalSum, siteId, clientName, returnStatus:'Success'}
 
     } catch (error) {
         console.log(error)
+        const ptoDateObject = new Date(ptoDate)
+        let badStartDate = new Date(ptoDate)
+        let badEndDate = new Date(ptoDate)
+        badStartDate.setFullYear(ptoDateObject.getFullYear() + (year-1))
+        badEndDate.setFullYear(ptoDateObject.getFullYear() + year)
+        return {startDate:badStartDate.toISOString().split('T')[0], endDate:badEndDate.toISOString().split('T')[0], finalSum: {sum:-1, nullAndUndefinedAndZeroCount:0}, siteId, clientName, returnStatus:'Error'}
     }
 }
 
@@ -36,12 +43,14 @@ const fetchData = async (siteId, startDate, endDate, monitoring_company) => {
 
     } else if (monitoring_company === "enphase") {
         data = await fetchEnphase(siteId, startDate, endDate)
+    } else if (monitoring_company === "sunpower") {
+        data = [{date: new Date(), value: 42}]
     }
 
     return await data
 }
 
-const getCurrentProductionYear = (ptoDate, currentProductionTotals) => {
+const decideWhichProductionYears = (ptoDate, productionYearsArray) => {
     const nullIndexArray = []
     const zeroIndexArray = []
     for (const [key, value] of Object.entries(currentProductionTotals)) {
@@ -68,6 +77,23 @@ const getCurrentProductionYear = (ptoDate, currentProductionTotals) => {
     yearStartAndEndArray = fullYearsObject[yearNumber - 1]
 
     return yearStartAndEndArray
+    return null
+}
+
+const getProductionYear = (ptoDate, year) => {
+    const ptoDateObject = new Date(ptoDate)
+    const currentDate = new Date()
+    startDate = new Date(ptoDate)
+    endDate = new Date(ptoDate)
+
+    startDate.setFullYear(ptoDateObject.getFullYear() + (year-1))
+    endDate.setFullYear(ptoDateObject.getFullYear() + year)
+
+    if(startDate>currentDate || endDate>currentDate) {
+        throw new Error(`The requested production year is out of bounds\t startDate: ${startDate} -- endDate: ${endDate}`)
+    }
+
+    return [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]
 }
 
 const getFullYearsSincePTO = (ptoDate) => {
@@ -102,5 +128,4 @@ const getAYearFromDate = (date) => {
 }
 
 
-
-module.exports = {getYearData, fetchData, getCurrentProductionYear}
+module.exports = {getYearData, fetchData, getProductionYear, decideWhichProductionYears}
