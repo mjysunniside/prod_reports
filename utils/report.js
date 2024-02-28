@@ -128,4 +128,4 @@ const getAYearFromDate = (date) => {
 }
 
 
-module.exports = {getYearData, fetchData, getProductionYear, decideWhichProductionYears}
+module.exports = {getYearData, fetchData, getProductionYear, decideWhichProductionYears, getAYearFromDate}

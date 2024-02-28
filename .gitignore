@@ -4,6 +4,8 @@
 **/*token*
 # ds store
 **/.DS_Store
+# cookies
+**/*cookies*
 
 # Logs
 logs
