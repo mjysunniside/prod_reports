@@ -167,12 +167,12 @@ const resolveSunpower = (value) => {
             valueReturnString = value
         }
     } else {
-        valueReturnString = value.substring(2)
+        valueReturnString = value
     }
     return valueReturnString
 }
 
-fs.createReadStream('./data/ProductionReportListYear3.csv')
+fs.createReadStream('./data/year3Short.csv')
     .pipe(csv())
     .on('data', data => results.push(data))
     .on('end', async () => {
@@ -237,8 +237,10 @@ fs.createReadStream('./data/ProductionReportListYear3.csv')
         csvWriter.writeRecords(csvClients)
             .then(() => {
                 console.log('CSV file written successfully');
+                return
             })
             .catch((err) => {
                 console.error('Error writing CSV:', err);
+                return
             });
     })

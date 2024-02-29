@@ -1,6 +1,7 @@
 require("dotenv").config()
 // require("dotenv").config({ path: "./enphase.env" })
 const fs = require('fs')
+const path = require('path');
 const axios = require("axios")
 const tokens = require('./tokens.json')
 
@@ -17,16 +18,19 @@ MAX_RETRY_COUNT = 2
 const getAuthTokensEnphase = async () => {
   client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
   client_id_enphase = process.env.CLIENT_ID_ENPHASE
+  const enphaseGetTokenUrl = `https://api.enphaseenergy.com/oauth/token?grant_type=password&username=${process.env.USERNAME_ENPHASE}&password=${process.env.PASSWORD_ENPHASE}`
   id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
   encodedIdSecret = Buffer.from(id_secret_toEncode_enphase).toString('base64')
 
-  await axios.post(enphaseURL, null, {
+  await axios.post(enphaseGetTokenUrl, null, {
     headers: {
       'Authorization': `Basic ${encodedIdSecret}`
     }
   })
     .then(res => {
-      fs.writeFileSync("./tokenInfo.json", JSON.stringify(res.data))
+      const currentDir = path.dirname(__filename);
+      const filePath = path.join(currentDir, 'tokens.json');
+      fs.writeFileSync(filePath, JSON.stringify(res.data))
     })
 
 }
@@ -46,8 +50,12 @@ const refreshEnphase = async () => {
     }
   })
     .then(res => {
+      console.log('logging res from enphase')
+      console.log(res)
       if (res?.data?.access_token) {
-        fs.writeFileSync("./tokens.json", JSON.stringify(res.data))
+        const currentDir = path.dirname(__filename);
+        const filePath = path.join(currentDir, 'tokens.json');
+        fs.writeFileSync(filePath, JSON.stringify(res.data))
       } else {
         throw new Error("Error in refresh function")
       }
@@ -84,7 +92,11 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
       throw new Error(`In fetch enphase it was not authentication issues. siteID: ${siteId}`)
     }
     if (retryCount < MAX_RETRY_COUNT) {
-      await refreshEnphase()
+      if (retryCount >= 1) {
+        await getAuthTokensEnphase()
+      } else {
+        await refreshEnphase()
+      }
       access_token = tokens['access_token']
       return await fetchEnphase(siteId, startDate, endDate, retryCount + 1)
     } else {

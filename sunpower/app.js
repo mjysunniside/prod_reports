@@ -1,8 +1,9 @@
-// require('dotenv').config()
-require('dotenv').config({ path: "./spr.env" })
+require('dotenv').config()
+// require('dotenv').config({ path: "./spr.env" })
 const puppeteer = require('puppeteer')
 const { setTimeout } = require("node:timers/promises")
 const fs = require('fs')
+const path = require('path');
 
 const SPR_DASH = "https://monitor.sunpower.com/#/dashboard"
 const MONTH_MAP = {
@@ -20,17 +21,7 @@ const MONTH_MAP = {
     "12": "December",
 }
 
-// const client1 = {
-//     clientName: "Sara Miles",
-//     siteId: "A_299486",
-//     startDate: "2021-03-02",
-//     endDate: "2022-03-02",
-//     productionYears: {
-//         1: 10085,
-//         2: null,
-//         3: null
-//     }
-// }
+
 
 const calendarAutomation = async (page, startDate, endDate) => {
     await page.waitForSelector("mat-calendar")
@@ -90,8 +81,8 @@ const selectCalendarDay = async (page, day, month, year) => {
 }
 
 const sprLogin = async (page) => {
-    await page.type('#username', process.env.SPR_USERNAME)
-    await page.type('#password', process.env.SPR_PASSWORD)
+    await page.type('#username', process.env.USERNAME_SUNPOWER)
+    await page.type('#password', process.env.PASSWORD_SUNPOWER)
     await page.click('[title="Sign In"]')
     await page.waitForSelector('[placeholder="Search Sites"]')
     const cookies = await page.cookies()
@@ -111,15 +102,17 @@ const fillMyObject = async (object, content) => {
 
 //
 const fetchSunpower = async (siteId, startDate, endDate) => {
-    // const browser = await puppeteer.launch();
-    const browser = await puppeteer.launch({ headless: false });
+    const browser = await puppeteer.launch();
+    // const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     
     let responseDataObj = {};
 
     let cookies = null
-    if(fs.existsSync("./data/cookies.json")) {
-        cookies = JSON.parse(fs.readFileSync("./data/cookies.json"))
+    const currentDir = path.dirname(__filename);
+    const filePath = path.join(currentDir, 'data/cookies.json');
+    if(fs.existsSync(filePath)) {
+        cookies = JSON.parse(fs.readFileSync(filePath))
         page.setCookie(...cookies)
     }
 
@@ -127,9 +120,7 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
     if (page.url() !== SPR_DASH) {
         await page.waitForSelector('[title="Sign In"]');
         await sprLogin(page)
-        if(page.url()===SPR_DASH) {
-            console.log("we got it")
-        } else {
+        if(page.url()!==SPR_DASH) {
             throw new Error("Something went wrong logging in")
         }
     } 
@@ -188,6 +179,18 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
         throw new Error("Something went wrong response data not defined")
     }
 }
+
+// const client1 = {
+//     clientName: "Sara Miles",
+//     siteId: "A_299486",
+//     startDate: "2021-03-02",
+//     endDate: "2022-03-02",
+//     productionYears: {
+//         1: 10085,
+//         2: null,
+//         3: null
+//     }
+// }
 
 // fetchSunpower(client1.siteId, client1.startDate, client1.endDate).then(res => console.log(res))
 

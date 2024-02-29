@@ -1,5 +1,6 @@
 const {fetchSolarEdge} = require('../solaredge/app')
 const {fetchEnphase} = require('../enphase/app')
+const {fetchSunpower} = require('../sunpower/app')
 
 //return {value:year production, nullCount: count of null dates}
 const getYearData = async (siteId, ptoDate, year, monitoring_company, clientName) => {
@@ -44,7 +45,7 @@ const fetchData = async (siteId, startDate, endDate, monitoring_company) => {
     } else if (monitoring_company === "enphase") {
         data = await fetchEnphase(siteId, startDate, endDate)
     } else if (monitoring_company === "sunpower") {
-        data = [{date: new Date(), value: 42}]
+        data = await fetchSunpower(siteId, startDate, endDate)
     }
 
     return await data
