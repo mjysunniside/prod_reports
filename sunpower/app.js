@@ -1,14 +1,10 @@
+// require('dotenv').config()
 require('dotenv').config({ path: "./spr.env" })
 const puppeteer = require('puppeteer')
 const { setTimeout } = require("node:timers/promises")
 const fs = require('fs')
-const {getAYearFromDate} = require('../utils/report')
-
-
-
 
 const SPR_DASH = "https://monitor.sunpower.com/#/dashboard"
-const SPR_SITE = "https://monitor.sunpower.com/#/sites/A_291113/siteEnergy"
 const MONTH_MAP = {
     "01": "January",
     "02": "February",
@@ -24,35 +20,30 @@ const MONTH_MAP = {
     "12": "December",
 }
 
-const client1 = {
-    clientName: "Sara Miles",
-    siteId: "A_299486",
-    ptoDate: "2021-03-02",
-    productionYears: {
-        1: 10085,
-        2: null,
-        3: null
-    }
-}
+// const client1 = {
+//     clientName: "Sara Miles",
+//     siteId: "A_299486",
+//     startDate: "2021-03-02",
+//     endDate: "2022-03-02",
+//     productionYears: {
+//         1: 10085,
+//         2: null,
+//         3: null
+//     }
+// }
 
-const calendarAutomation = async (page, yearStart) => {
+const calendarAutomation = async (page, startDate, endDate) => {
     await page.waitForSelector("mat-calendar")
-    console.log("calendar is there")
     await page.waitForSelector(".mat-calendar-period-button")
     await page.click(".mat-calendar-period-button")
     await page.waitForSelector(".mat-calendar-table")
-    console.log("found calender year table")
-    const dateObj = new Date(yearStart)
-    const yearAwayDateObj = getAYearFromDate(dateObj)
-    if(yearAwayDateObj==null) {
-        throw new Error(`the end of production year may be to late it is nullish: ${yearAwayDateObj}`)
-    }
-    const yearAwayDateString = yearAwayDateObj.toISOString().split('T')[0]
-    const dateStartSplit = yearStart.split("-")
+    
+    
+    const dateStartSplit = startDate.split("-")
     const startingYear = dateStartSplit[0]
     const startingMonth = MONTH_MAP[dateStartSplit[1]]
     const startingDate = dateStartSplit[2]
-    const dateEndSplit = yearAwayDateString.split("-")
+    const dateEndSplit = endDate.split("-")
     const endingYear = dateEndSplit[0]
     const endingMonth = MONTH_MAP[dateEndSplit[1]]
     const endingDate = dateEndSplit[2]
@@ -71,17 +62,11 @@ const calendarAutomation = async (page, yearStart) => {
 }
 
 const selectCalendarYear = async (page, year) => {
-    // console.log("in here")
     const yearSelector = `.mat-calendar-body tr td button[aria-label="${year}"] span`
-    // console.log(`here is the yearsSelector: ${yearSelector}`)
     await page.waitForSelector(".mat-calendar-body")
     try {
         await page.waitForSelector(yearSelector)
-        console.log('I found the selector...')
         await page.$eval(yearSelector, el => el.click())
-        // await setTimeout(10000)
-        // await page.click(yearSelector)
-        console.log('I clicked the year')
     } catch (error) {
         console.log(error)
         process.exit(1)
@@ -114,12 +99,23 @@ const sprLogin = async (page) => {
     fs.writeFileSync('./data/cookies.json', JSON.stringify(cookies))
 }
 
+const fillMyObject = async (object, content) => {
+    return new Promise((resolve, reject) => {
+        if(object.hasOwnProperty('fill')) {
+            reject('already has the prop')
+        } else {
+            resolve(object.fill = content)
+        }
+    })
+}
 
-
-const newMain = async (client) => {
+//
+const fetchSunpower = async (siteId, startDate, endDate) => {
     // const browser = await puppeteer.launch();
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
+    
+    let responseDataObj = {};
 
     let cookies = null
     if(fs.existsSync("./data/cookies.json")) {
@@ -130,23 +126,18 @@ const newMain = async (client) => {
     await page.goto(SPR_DASH);
     if (page.url() !== SPR_DASH) {
         await page.waitForSelector('[title="Sign In"]');
-        console.log('...logging in...')
         await sprLogin(page)
         if(page.url()===SPR_DASH) {
             console.log("we got it")
         } else {
             throw new Error("Something went wrong logging in")
         }
-    } else {
-        console.log("we went straight there!!!!!")
-    }
+    } 
 
-    const energyUrl = `https://monitor.sunpower.com/#/sites/${client1.siteId}/siteEnergy`
+    const energyUrl = `https://monitor.sunpower.com/#/sites/${siteId}/siteEnergy`
     await page.goto(energyUrl)
     await page.waitForSelector(".time-select-container")
-    console.log('I just waited for the time select container to check i can do further work')
     await setTimeout(10000);
-    // await timeSelectContainer.waitForSelector('mat-form-field')
     // The next selector is the only one that works for selecting that date range ("i want custom")
     await page.waitForSelector(".time-select-container span.mat-select-min-line.ng-tns-c3082329526-3.ng-star-inserted")
     await page.click(".time-select-container span.mat-select-min-line.ng-tns-c3082329526-3.ng-star-inserted")
@@ -160,20 +151,44 @@ const newMain = async (client) => {
 
     await setTimeout(10000)
 
+    const separator = Array(156).join('=')
+    page.on('response', async response => {
+        if(response.request().method() !== 'POST') return
+        if (response.url().includes('/graphql')) {
+            const responseData = await response.json()
+            // console.log(responseData.data.siteEnergy)
+            await fillMyObject(responseDataObj, responseData.data.siteEnergy)
+        }
+    })
+
     //NOTE HERE I WIL HAVE TO ADJUST THE DATA CUZ SUNPOWER DONT EXPORT PARTIAL YEARS!!!!
-
-    await calendarAutomation(page, client.ptoDate)
-
-
+    //MORE LIKELY I SHOULD DO IT IN CALENDAR AUTOMATION -- JUST USE DATE OBJECT AND IF DATE<15...
+    await calendarAutomation(page, startDate, endDate)
+    
+    let i=0
+    while(!responseDataObj.hasOwnProperty('fill') && i<5) {
+        await setTimeout(5000)
+        i++
+    }
+    // console.log(responseDataObj)
     await setTimeout(10000)
 
-    await page.waitForSelector(".export-button")
-    await page.click(".export-button")
-
-    await setTimeout(10000)
-
-
+    
     await browser.close();
+
+    if(responseDataObj?.fill?.items!=undefined) {
+
+        const data = responseDataObj.fill.items.map(element => (
+            {date:element.timestamp, value: element.solarProductionValues}
+        ))
+        
+        return data
+
+    } else {
+        throw new Error("Something went wrong response data not defined")
+    }
 }
 
-newMain(client1)
+// fetchSunpower(client1.siteId, client1.startDate, client1.endDate).then(res => console.log(res))
+
+module.exports = {fetchSunpower}
