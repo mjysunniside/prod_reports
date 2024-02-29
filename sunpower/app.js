@@ -87,7 +87,9 @@ const sprLogin = async (page) => {
     await page.waitForSelector('[placeholder="Search Sites"]')
     const cookies = await page.cookies()
 
-    fs.writeFileSync('./data/cookies.json', JSON.stringify(cookies))
+    const currentDir = path.dirname(__filename);
+    const filePath = path.join(currentDir, 'data/cookies.json');
+    fs.writeFileSync(filePath, JSON.stringify(cookies))
 }
 
 const fillMyObject = async (object, content) => {
