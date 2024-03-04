@@ -88,7 +88,14 @@ const sprLogin = async (page) => {
     const cookies = await page.cookies()
 
     const currentDir = path.dirname(__filename);
-    const filePath = path.join(currentDir, 'data/cookies.json');
+    const dataDir = path.join(currentDir, 'data')
+
+    if(!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir)
+    }
+
+    const filePath = path.join(dataDir, 'cookies.json');
+    
     fs.writeFileSync(filePath, JSON.stringify(cookies))
 }
 
@@ -194,6 +201,19 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
 //     }
 // }
 
+// const client2 = {
+//     clientName: "Dicicco",
+//     siteId: "A_230526",
+//     startDate: "2021-03-02",
+//     endDate: "2022-03-02",
+//     productionYears: {
+//         1: 10085,
+//         2: null,
+//         3: null
+//     }
+// }
+
 // fetchSunpower(client1.siteId, client1.startDate, client1.endDate).then(res => console.log(res))
+// fetchSunpower(client2.siteId, client2.startDate, client2.endDate).then(res => console.log(res))
 
 module.exports = {fetchSunpower}
