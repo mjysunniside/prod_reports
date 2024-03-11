@@ -106,6 +106,7 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
 }
 
 const fetchAllSitesEnphase = () => {
+  const access_token = tokens['access_token']
   axios.get(`https://api.enphaseenergy.com/api/v4/systems/?key=${process.env.API_KEY_ENPHASE}`, {
     headers: {
       'Authorization': `Bearer ${access_token}`

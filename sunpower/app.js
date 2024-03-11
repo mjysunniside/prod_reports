@@ -111,8 +111,8 @@ const fillMyObject = async (object, content) => {
 
 //
 const fetchSunpower = async (siteId, startDate, endDate) => {
-    const browser = await puppeteer.launch();
-    // const browser = await puppeteer.launch({ headless: false });
+    // const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
     
     let responseDataObj = {};
@@ -136,11 +136,11 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
 
     const energyUrl = `https://monitor.sunpower.com/#/sites/${siteId}/siteEnergy`
     await page.goto(energyUrl)
-    await page.waitForSelector(".time-select-container")
+    await page.waitForSelector(".time-select-container", {timeout: 50000})
     await setTimeout(10000);
     // The next selector is the only one that works for selecting that date range ("i want custom")
-    await page.waitForSelector(".time-select-container span.mat-select-min-line.ng-tns-c3082329526-3.ng-star-inserted")
-    await page.click(".time-select-container span.mat-select-min-line.ng-tns-c3082329526-3.ng-star-inserted")
+    await page.waitForSelector(".time-select-container span.mat-select-min-line.ng-tns-c3082329526-3.ng-star-inserted", {timeout: 50000})
+    await page.click(".time-select-container span.mat-select-min-line.ng-tns-c3082329526-3.ng-star-inserted", {timeout: 50000})
     await page.keyboard.press('ArrowDown')
     await page.keyboard.press('ArrowDown')
     await page.keyboard.press('ArrowDown')

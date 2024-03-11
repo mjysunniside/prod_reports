@@ -12,6 +12,14 @@ const API_ACCOUNT_TOKEN = process.env.SOLAREDGE_API_KEY
 //     3: null
 // }
 
+// const SITE_ID = '3141439'
+// const PTO_DATE = '2022-10-1'
+// const PRODUCTION_TOTALS = {
+//     1: 0,
+//     2: 0,
+//     3: null
+// }
+
 
 const fetchSolarEdge = async (siteId, startDate, endDate) => {
     let data;
@@ -26,7 +34,8 @@ const fetchSolarEdge = async (siteId, startDate, endDate) => {
     return await data
 }
 
-// fetchSolarEdge(SITE_ID, '2021-01-27', '2022-01-27')
+
+// fetchSolarEdge(SITE_ID, '2022-10-11', '2023-10-1').then(res => console.log(res))
 
 
 

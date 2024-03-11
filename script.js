@@ -7,7 +7,7 @@ const {getYearData} = require('./utils/report')
 
 let results = []
 
-const PRODUCTION_TARGET_YEAR = 3
+const PRODUCTION_TARGET_YEAR = 1
 
 const resolveProductionValue = (value) => {
     let numberValue;
@@ -116,63 +116,102 @@ const resolveBrandAndId = (infoObject) => {
 }
 
 const resolveSolarEdge = (value) => {
-    let valueReturnString
     // console.log(value)
-    if (!value.includes('http')) {
-        if (value === '' || value === '.') {
-            valueReturnString = null
+    try {
+        if (!value.includes('http')) {
+            if (value === '' || value === '.') {
+                return null
+            } else {
+                return value
+            }
         } else {
-            valueReturnString = value
-        }
-    } else {
-        const array = value.split('site/')
-        const idLength = array[1].length
-        if(array[1].charAt(idLength-1)==='/') {
-            array[1] = array[1].substring(0, idLength-1)
-        }
-        valueReturnString = array[1]
+            const array = value.split('site/')
+            if(!array[1]) {
+                throw new Error("issue with parsing solaredge id")
+            }
+            
+            const hashSplit = array[1].split('#')
+
+            if(!hashSplit[1]) {
+                const slashSplit = array[1].split('/')
+                if(!slashSplit[1]) {
+                    return array[1]
+                } else {
+                    return slashSplit[0]
+                }
+            }
+            return hashSplit[0]
+        }    
+    } catch (error) {
+        console.log("error with parsing solaredge id")
+        return null
     }
-    return valueReturnString
+    
+ 
 }
 
 const resolveEnphase = (value) => {
     // console.log(`Enphase value: ${value}`)
-    let valueReturnString
-    // console.log(value)
-    if (!value.includes('http')) {
-        if (value === '' || value === '.') {
-            valueReturnString = null
+    try {
+        // console.log(value)
+        if (!value.includes('http')) {
+            if (value === '' || value === '.') {
+                return null
+            } else {
+                return value
+            }
         } else {
-            valueReturnString = value
+            const array = value.split('systems/')
+
+            if(!array[1]) {
+                throw new Error("problem with enphase id resolver")
+            }
+            
+            const secondSplit = array[1].split('/arrays')
+            const id = secondSplit[0].endsWith('/') ? secondSplit[0].slice(0, -1) : secondSplit[0]
+
+            return id
         }
-    } else {
-        const array = value.split('systems/')
-        const idLength = array[1].length
-        if(array[1].charAt(idLength-1)==='/') {
-            array[1] = array[1].substring(0, idLength-1)
-        }
-        valueReturnString = array[1]
+    } catch (error) {
+        console.log('unable to find enphase')
+        return null
     }
-    return valueReturnString
+    
 }
 
 const resolveSunpower = (value) => {
     // console.log(`Sunpower value: ${value}`)
-    let valueReturnString
     // console.log(value)
-    if (!value.includes('A_')) {
-        if (value === '' || value === '.') {
-            valueReturnString = null
+    try {
+        if(value.includes('https')) {
+            const firstSplit = value.split('sites/')
+            if(!firstSplit[1]) {
+                throw new Error("error parsing sunpower id")
+            }
+            const secondSplit = firstSplit[1].split('/')
+            if(!secondSplit[1]) {
+                return firstSplit[1]
+            } else {
+                return secondSplit[0]
+            }
+        } else if (!value.includes('A_')) {
+            if (value === '' || value === '.') {
+                return null
+            } else {
+                return value
+            }
         } else {
-            valueReturnString = value
+            return value
         }
-    } else {
-        valueReturnString = value
+        
+    } catch (error) {
+        console.log("Error getting spr id")
+        return null
     }
-    return valueReturnString
+    
 }
 
-fs.createReadStream('./data/year3Short.csv')
+fs.createReadStream('./data/third_50_yr_1.csv')
     .pipe(csv())
     .on('data', data => results.push(data))
     .on('end', async () => {
@@ -223,7 +262,7 @@ fs.createReadStream('./data/year3Short.csv')
         }
         // console.log(csvClients)
         const csvWriter = createCsvWriter({
-            path: './data/outputFinal.csv',
+            path: './data/third_50_yr_1_OUTPUT.csv',
             header: [
                 { id: 'clientName', title: 'Name' },
                 { id: 'ptoDate', title: 'PTO Date' },
