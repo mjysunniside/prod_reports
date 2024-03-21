@@ -3,7 +3,7 @@ require("dotenv").config()
 const fs = require('fs')
 const path = require('path');
 const axios = require("axios")
-const tokens = require('./tokens.json')
+
 
 
 MAX_RETRY_COUNT = 2
@@ -36,8 +36,16 @@ const getAuthTokensEnphase = async () => {
 }
 
 const refreshEnphase = async () => {
-  const access_token = tokens['access_token']
-  const refresh_token = `${tokens['refresh_token']}`
+  const currentDir = path.dirname(__filename);
+  const filePath = path.join(currentDir, 'tokens.json');
+  if(!fs.existsSync(filePath)) {
+    await getAuthTokensEnphase()
+  }
+  
+  let refresh_token;
+  const json = JSON.parse(fs.readFileSync(filePath))
+  refresh_token = json["refresh_token"]
+
   const REFRESH_URL_ENPHASE = `https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=${refresh_token}`
   client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
   client_id_enphase = process.env.CLIENT_ID_ENPHASE
@@ -50,8 +58,6 @@ const refreshEnphase = async () => {
     }
   })
     .then(res => {
-      console.log('logging res from enphase')
-      console.log(res)
       if (res?.data?.access_token) {
         const currentDir = path.dirname(__filename);
         const filePath = path.join(currentDir, 'tokens.json');
@@ -63,7 +69,18 @@ const refreshEnphase = async () => {
 }
 
 const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
-  let access_token = tokens['access_token']
+  let access_token;
+  let json;
+  const currentDir = path.dirname(__filename);
+  const filePath = path.join(currentDir, 'tokens.json');
+  if(fs.existsSync(filePath)) {
+    json = JSON.parse(fs.readFileSync(filePath))
+    access_token = json["access_token"]
+  } else {
+    await getAuthTokensEnphase()
+    json = JSON.parse(fs.readFileSync(filePath))
+    access_token = json["access_token"]
+  }
   // console.log(`Up top here is try ${retryCount}`)
   try {
     let data;
@@ -97,7 +114,8 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
       } else {
         await refreshEnphase()
       }
-      access_token = tokens['access_token']
+      json = JSON.parse(fs.readFileSync(filePath))
+      access_token = json['access_token']
       return await fetchEnphase(siteId, startDate, endDate, retryCount + 1)
     } else {
       throw new Error(`Reached maximum retry county in fetch enphase, site id: ${siteId}`)
@@ -134,6 +152,8 @@ const fetchAllSitesEnphase = () => {
 // }
 
 // fetchEnphase(cartzdafner.siteId, '2022-02-02', '2023-02-02')
+//   .then(res => console.log(res))
+//   .catch(e => console.log(e))
 
 
 module.exports = { fetchEnphase, fetchAllSitesEnphase }

@@ -1,5 +1,5 @@
-require('dotenv').config()
-// require('dotenv').config({ path: "./spr.env" })
+// require('dotenv').config()
+require('dotenv').config({ path: "./spr.env" })
 const puppeteer = require('puppeteer')
 const { setTimeout } = require("node:timers/promises")
 const fs = require('fs')
@@ -22,8 +22,12 @@ const MONTH_MAP = {
 }
 
 
-
+//the problem is that with hours the calendar does
 const calendarAutomation = async (page, startDate, endDate) => {
+    // await page.waitForSelector("#mat-select-value-3")
+    // await page.click("#mat-select-value-3")
+    // await page.keyboard.press('ArrowUp')
+    // await page.keyboard.press('Enter')
     await page.waitForSelector("mat-calendar")
     await page.waitForSelector(".mat-calendar-period-button")
     await page.click(".mat-calendar-period-button")
@@ -44,9 +48,11 @@ const calendarAutomation = async (page, startDate, endDate) => {
     await selectCalendarMonth(page, startingMonth, startingYear)
     await selectCalendarDay(page, startingDate, startingMonth, startingYear)
     //reseting to year select again to start end of period
+    // await setTimeout(10000)
     await page.waitForSelector(".mat-calendar-period-button")
     await page.click(".mat-calendar-period-button")
-    // clicking to end of period
+    // process.exit(1)
+    // // clicking to end of period
     await selectCalendarYear(page, endingYear)
     await selectCalendarMonth(page, endingMonth, endingYear)
     await selectCalendarDay(page, endingDate, endingMonth, endingYear)
@@ -110,10 +116,10 @@ const fillMyObject = async (object, content) => {
 }
 
 //
-const fetchSunpower = async (siteId, startDate, endDate) => {
+const fetchSunpowerHours = async (siteId, startDate, endDate) => {
     try {
-        const browser = await puppeteer.launch();
-        // const browser = await puppeteer.launch({ headless: false });
+        // const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
 
         let responseDataObj = {};
@@ -132,10 +138,6 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
             await sprLogin(page)
             if(page.url()!==SPR_DASH) {
                 throw new Error("Something went wrong logging in")
-            }
-            if(fs.existsSync(filePath)) {
-                cookies = JSON.parse(fs.readFileSync(filePath))
-                page.setCookie(...cookies)
             }
         } 
 
@@ -161,7 +163,7 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
             if(response.request().method() !== 'POST') return
             if (response.url().includes('/graphql')) {
                 const responseData = await response.json()
-                // console.log(responseData.data.siteEnergy)
+                // console.log(responseData.data.siteEnergy.items)
                 await fillMyObject(responseDataObj, responseData.data.siteEnergy)
             }
         })
@@ -199,17 +201,17 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
     
 }
 
-// const client1 = {
-//     clientName: "Sara Miles",
-//     siteId: "A_299486",
-//     startDate: "2021-03-02",
-//     endDate: "2022-03-02",
-//     productionYears: {
-//         1: 10085,
-//         2: null,
-//         3: null
-//     }
-// }
+const client1 = {
+    clientName: "Sara Miles",
+    siteId: "A_299486",
+    startDate: "2021-03-02",
+    endDate: "2021-03-09",
+    productionYears: {
+        1: 10085,
+        2: null,
+        3: null
+    }
+}
 
 // const client2 = {
 //     clientName: "Dicicco",
@@ -223,7 +225,7 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
 //     }
 // }
 
-// fetchSunpower(client1.siteId, client1.startDate, client1.endDate).then(res => console.log(res))
-// fetchSunpower(client2.siteId, client2.startDate, client2.endDate).then(res => console.log(res))
+fetchSunpowerHours(client1.siteId, client1.startDate, client1.endDate).then(res => console.log(res))
+// fetchSunpowerHours(client2.siteId, client2.startDate, client2.endDate).then(res => console.log(res))
 
-module.exports = {fetchSunpower}
+module.exports = {fetchSunpowerHours}
