@@ -12,9 +12,9 @@ const {getYearData} = require('./utils/report')
 //2018 1, 2, 3
 
 const PRODUCTION_TARGET_YEAR = 1
-const ZOHO_TIMEFRAME_START = "2022-01-01"
-const ZOHO_TIMEFRAME_END = "2022-08-01"
-ZOHO_PTO_YEAR = "2022_ongrid"
+const ZOHO_TIMEFRAME_START = "2021-01-01"
+const ZOHO_TIMEFRAME_END = "2021-12-31"
+ZOHO_PTO_YEAR = "2021"
 
 const resolveProductionValue = (value) => {
     let numberValue;
@@ -251,29 +251,41 @@ const main = async () => {
                 client[`Start_Date_Year_${PRODUCTION_TARGET_YEAR}`] = '01-01-2000'
                 client[`End_Date_Year_${PRODUCTION_TARGET_YEAR}`] = '01-01-2000'
             } else {
-                const production = await getYearData(client.siteId, client["PTO_Date"], PRODUCTION_TARGET_YEAR, client.type, client["Deal_Name"])
-                if(typeof production.finalSum?.sum === 'number'){
-                    client["Actual_Production"] = Math.round(production.finalSum?.sum)
+                const production2021 = await getYearData(client.siteId, "2021-01-01", 1, client.type, client["Deal_Name"])
+                const production2022 = await getYearData(client.siteId, "2022-01-01", 1, client.type, client["Deal_Name"])
+                const production2023 = await getYearData(client.siteId, "2023-01-01", 1, client.type, client["Deal_Name"])
+                if(typeof production2021.finalSum?.sum === 'number'){
+                    client["Actual_Production_2021"] = Math.round(production2021.finalSum?.sum)
                 } else {
-                    client["Actual_Production"] = -70
+                    client["Actual_Production_2021"] = -70
                 }
-                client[`Start_Date_Year_${PRODUCTION_TARGET_YEAR}`] = production.startDate
-                client[`End_Date_Year_${PRODUCTION_TARGET_YEAR}`] = production.endDate
+                if(typeof production2022.finalSum?.sum === 'number'){
+                    client["Actual_Production_2022"] = Math.round(production2022.finalSum?.sum)
+                } else {
+                    client["Actual_Production_2022"] = -70
+                }
+                if(typeof production2023.finalSum?.sum === 'number'){
+                    client["Actual_Production_2023"] = Math.round(production2023.finalSum?.sum)
+                } else {
+                    client["Actual_Production_2023"] = -70
+                }
+                
             }
 
         }
 
         const csvWriter = createCsvWriter({
-            path: `./data/Year_${PRODUCTION_TARGET_YEAR}_ZohoPtoYear_${ZOHO_PTO_YEAR}.csv`,
+            path: `./data/Yearly_2021_2023_ZohoPtoYear_${ZOHO_PTO_YEAR}.csv`,
             header: [
+                { id: 'id', title: 'Zoho_Opportunity_ID' },
                 { id: 'Deal_Name', title: 'Opportunity_Name' },
                 { id: 'PTO_Date', title: 'PTO_Date' },
-                { id: `Start_Date_Year_${PRODUCTION_TARGET_YEAR}`, title: `Production_Year_${PRODUCTION_TARGET_YEAR}_Start` },
-                { id: `End_Date_Year_${PRODUCTION_TARGET_YEAR}`, title: `Production_Year_${PRODUCTION_TARGET_YEAR}_End` },
                 { id: 'type', title: 'Manufacturer' },
                 { id: 'siteId', title: 'Site_ID' },
                 { id: 'Estimated_output_year_1', title: 'Estimated_Production' },
-                { id: 'Actual_Production', title: `Actual_Production_Year_${PRODUCTION_TARGET_YEAR}` },
+                { id: 'Actual_Production_2021', title: `Actual_Production_2021` },
+                { id: 'Actual_Production_2022', title: `Actual_Production_2022` },
+                { id: 'Actual_Production_2022', title: `Actual_Production_2022` },
             ]
         });
         await csvWriter.writeRecords(data)

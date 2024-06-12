@@ -1,5 +1,5 @@
-require('dotenv').config()
-// require('dotenv').config({ path: "./spr.env" })
+// require('dotenv').config()
+require('dotenv').config({ path: "./spr.env" })
 const puppeteer = require('puppeteer')
 const { setTimeout } = require("node:timers/promises")
 const fs = require('fs')
@@ -115,11 +115,89 @@ const fillMyObject = async (object, content) => {
     
 }
 
-//
+const getCurrentGraphqlToken = async () => {
+    const chuckSite = {
+        clientName: "Holding",
+        siteId: "A_140519",
+        startDate: "2017-08-15",
+        endDate: "2018-08-15",
+        productionYears: {
+            1: 3625,
+            2: 3456,
+            3: 3692,
+        }
+    }
+    const siteId = chuckSite.siteId
+    const startDate = chuckSite.startDate
+    const endDate = chuckSite.endDate
+    let browser;
+    try {
+        browser = await puppeteer.launch({ headless: false });
+        const page = await browser.newPage();
+
+        let cookies = null
+        const currentDir = path.dirname(__filename);
+        const filePath = path.join(currentDir, 'data/cookies.json');
+        if(fs.existsSync(filePath)) {
+            cookies = JSON.parse(fs.readFileSync(filePath))
+            page.setCookie(...cookies)
+        }
+
+        await page.goto(SPR_DASH);
+        if (page.url() !== SPR_DASH) {
+            await page.waitForSelector('[title="Sign In"]');
+            await sprLogin(page)
+            if(page.url()!==SPR_DASH) {
+                throw new Error("Something went wrong logging in")
+            }
+            if(fs.existsSync(filePath)) {
+                cookies = JSON.parse(fs.readFileSync(filePath))
+                page.setCookie(...cookies)
+            }
+        } 
+
+        
+        page.on('request', async request => {
+            if(request.url().includes('/graphql')) {
+                // console.log('Request Headers:', request.headers()["authorization"]);
+                const qlToken = request.headers()["authorization"].split(" ")[1]   
+                const currentDir = path.dirname(__filename);
+                const dataDir = path.join(currentDir, 'data')
+
+                if(!fs.existsSync(dataDir)) {
+                    fs.mkdirSync(dataDir)
+                } 
+
+                const filePath = path.join(dataDir, 'graphqlToken.json');
+                let existingToken = null;
+
+                if (fs.existsSync(filePath)) {
+                    existingToken = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                }
+
+                
+                if (existingToken !== qlToken) {
+                    fs.writeFileSync(filePath, JSON.stringify(qlToken));
+                }
+            }
+        });
+        const energyUrl = `https://monitor.sunpower.com/#/sites/${siteId}/siteEnergy`
+        await page.goto(energyUrl)
+        await setTimeout(10000)
+        
+    } catch (error) {
+        console.log(error)
+    } finally {
+        await browser.close()
+    }
+}
+
+
+
 const fetchSunpower = async (siteId, startDate, endDate) => {
     try {
-        const browser = await puppeteer.launch();
-        // const browser = await puppeteer.launch({ headless: false });
+        // const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
 
         let responseDataObj = {};
@@ -217,19 +295,20 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
 //     }
 // }
 
-// const client2 = {
-//     clientName: "Dicicco",
-//     siteId: "A_230526",
-//     startDate: "2021-03-02",
-//     endDate: "2022-03-02",
-//     productionYears: {
-//         1: 10085,
-//         2: null,
-//         3: null
-//     }
-// }
+const client2 = {
+    clientName: "Dicicco",
+    siteId: "A_230526",
+    startDate: "2021-03-02",
+    endDate: "2022-03-02",
+    productionYears: {
+        1: 10085,
+        2: null,
+        3: null
+    }
+}
 
 // fetchSunpower(client1.siteId, client1.startDate, client1.endDate).then(res => console.log(res))
 // fetchSunpower(client2.siteId, client2.startDate, client2.endDate).then(res => console.log(res))
+getCurrentGraphqlToken().then(res => console.log("hello", res))
 
 module.exports = {fetchSunpower}

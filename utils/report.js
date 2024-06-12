@@ -1,6 +1,6 @@
-const {fetchSolarEdge} = require('../solaredge/app')
-const {fetchEnphase} = require('../enphase/app')
-const {fetchSunpower} = require('../sunpower/app')
+const { fetchSolarEdge } = require('../solaredge/app')
+const { fetchEnphase } = require('../enphase/app')
+const { fetchSunpower } = require('../sunpower/app')
 
 //return {value:year production, nullCount: count of null dates}
 const getYearData = async (siteId, ptoDate, year, monitoring_company, clientName) => {
@@ -9,31 +9,35 @@ const getYearData = async (siteId, ptoDate, year, monitoring_company, clientName
         const [startDate, endDate] = getProductionYear(ptoDate, year)
         const data = await fetchData(siteId, startDate, endDate, monitoring_company)
         // console.log(data)
-
-        const finalSum = data.reduce(
-            (accumulator, currentValue) => {
-                let valueToReturn;
-                if (currentValue.value == null || currentValue.value === undefined || currentValue.value === 0) {
-                    accumulator.nullAndUndefinedAndZeroCount += 1
-                } else {
-                    accumulator.sum += (currentValue.value)
-                }
-                return accumulator
-            },
-            { sum: 0, nullAndUndefinedAndZeroCount: 0 },
-        );
+        let finalSum;
+        if (data==null || !data) {
+            finalSum = { sum: 0, nullAndUndefinedAndZeroCount: 0 }
+        } else {
+            finalSum = data.reduce(
+                (accumulator, currentValue) => {
+                    let valueToReturn;
+                    if (currentValue.value == null || currentValue.value === undefined || currentValue.value === 0) {
+                        accumulator.nullAndUndefinedAndZeroCount += 1
+                    } else {
+                        accumulator.sum += (currentValue.value)
+                    }
+                    return accumulator
+                },
+                { sum: 0, nullAndUndefinedAndZeroCount: 0 },
+            );
+        }
         // console.log("the year period is: " + startDate + " to " + endDate)
         // console.log("the total produced is: " + Math.round(finalSum.sum) + ".kWh")
-        return await {startDate, endDate, finalSum, siteId, clientName, returnStatus:'Success'}
+        return await { startDate, endDate, finalSum, siteId, clientName, returnStatus: 'Success' }
 
     } catch (error) {
         console.log(error)
         const ptoDateObject = new Date(ptoDate)
         let badStartDate = new Date(ptoDate)
         let badEndDate = new Date(ptoDate)
-        badStartDate.setFullYear(ptoDateObject.getFullYear() + (year-1))
+        badStartDate.setFullYear(ptoDateObject.getFullYear() + (year - 1))
         badEndDate.setFullYear(ptoDateObject.getFullYear() + year)
-        return {startDate:badStartDate.toISOString().split('T')[0], endDate:badEndDate.toISOString().split('T')[0], finalSum: {sum:-1, nullAndUndefinedAndZeroCount:0}, siteId, clientName, returnStatus:'Error'}
+        return { startDate: badStartDate.toISOString().split('T')[0], endDate: badEndDate.toISOString().split('T')[0], finalSum: { sum: -1, nullAndUndefinedAndZeroCount: 0 }, siteId, clientName, returnStatus: 'Error' }
     }
 }
 
@@ -87,10 +91,10 @@ const getProductionYear = (ptoDate, year) => {
     startDate = new Date(ptoDate)
     endDate = new Date(ptoDate)
 
-    startDate.setFullYear(ptoDateObject.getFullYear() + (year-1))
+    startDate.setFullYear(ptoDateObject.getFullYear() + (year - 1))
     endDate.setFullYear(ptoDateObject.getFullYear() + year)
 
-    if(startDate>currentDate || endDate>currentDate) {
+    if (startDate > currentDate || endDate > currentDate) {
         throw new Error(`The requested production year is out of bounds\t startDate: ${startDate} -- endDate: ${endDate}`)
     }
 
@@ -129,4 +133,4 @@ const getAYearFromDate = (date) => {
 }
 
 
-module.exports = {getYearData, fetchData, getProductionYear, decideWhichProductionYears, getAYearFromDate}
+module.exports = { getYearData, fetchData, getProductionYear, decideWhichProductionYears, getAYearFromDate }

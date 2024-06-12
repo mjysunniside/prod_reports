@@ -42,9 +42,12 @@ const getZohoDataInTimeFrame = async (startDate, endDate) => {
         const api_domain = "https://www.zohoapis.com"
         const sql_request_url = `${api_domain}/crm/v6/coql`
         const header = { "Authorization": `Zoho-oauthtoken ${process.env.ZOHO_ACCESS_TOKEN}` }
+        // const select_statement = {
+        //     "select_query": `select Deal_Name, PTO_Date, Inverter_Manufacturer, Enphase_Monitoring, SolarEdge_Monitoring, Sunpower_Legacy_ID, Estimated_output_year_1, Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5 from Deals where (((PTO_Date is not null) and (Year_1_Production is not null)) and (PTO_Date between '${startDate}' and '${endDate}')) order by Deal_Name limit 0, 2000`
+        // }
         const select_statement = {
-            "select_query": `select Deal_Name, PTO_Date, Inverter_Manufacturer, Enphase_Monitoring, SolarEdge_Monitoring, Sunpower_Legacy_ID, Estimated_output_year_1, Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5 from Deals where (((PTO_Date is not null) and (Year_1_Production is not null)) and (PTO_Date between '${startDate}' and '${endDate}')) order by Deal_Name limit 0, 2000`
-        }
+            "select_query": `select Deal_Name, PTO_Date, Inverter_Manufacturer, Enphase_Monitoring, SolarEdge_Monitoring, Sunpower_Legacy_ID, Estimated_output_year_1, Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5 from Deals where ((((PTO_Date is not null) and (PTO_Date between '${startDate}' and '${endDate}')) and (Project_Type not in ('Residential Storage', 'Generator Only', 'Commercial Storage', 'Off-Grid Service', 'Service Only'))) and (((Sunpower_Legacy_ID is not null) or (SolarEdge_Monitoring is not null)) or Enphase_Monitoring is not null)) order by Deal_Name limit 0, 2000`
+          }
         const data = await axios({
             method: "post",
             url: sql_request_url,
