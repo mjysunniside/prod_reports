@@ -1,21 +1,3 @@
-require('dotenv').config({ path: "./main.env" })
-const csv = require('csv-parser')
-const fs = require('fs')
-// const { resolve } = require('path')
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-const {getZohoDataInTimeFrame} = require("./zohoApi/recordPuller")
-const {getYearData} = require('./utils/report')
-
-//lets do 2020 year 2 and 3
-// 2021 year 1
-//2019 year 1,2,3
-//2018 1, 2, 3
-
-const PRODUCTION_TARGET_YEAR = 1
-const ZOHO_TIMEFRAME_START = "2022-01-01"
-const ZOHO_TIMEFRAME_END = "2022-08-01"
-ZOHO_PTO_YEAR = "2022_ongrid"
-
 const resolveProductionValue = (value) => {
     let numberValue;
     switch (value) {
@@ -47,14 +29,13 @@ const resolvePtoDate = (value) => {
 // returns either {siteId, type} or null
 const resolveBrandAndId = (infoObject) => {
     const { manufacturer, enphase, solarEdge, sunpower } = infoObject
-    let type
-    let siteId
-    let resolverReturner = {}
+    let type;
+    let siteId;
+    let resolverReturner = {};
     if (manufacturer !== '' && manufacturer !== '.') {
         switch (manufacturer) {
             case "solaredge":
                 type = "solaredge"
-                // console.log('we are in solaredddd')
                 siteId = resolveSolarEdge(solarEdge)
                 if (siteId == null) {
                     resolverReturner = null
@@ -62,8 +43,7 @@ const resolveBrandAndId = (infoObject) => {
                     resolverReturner.siteId = siteId
                     resolverReturner.type = type
                 }
-                // console.log(`ok we got solared site id: ${resolverReturner.siteId}`)
-                break
+                break;
             case "enphase":
                 type = "enphase"
                 siteId = resolveEnphase(enphase)
@@ -73,7 +53,7 @@ const resolveBrandAndId = (infoObject) => {
                     resolverReturner.siteId = siteId
                     resolverReturner.type = type
                 }
-                break
+                break;
             case "sunpower":
                 type = "sunpower"
                 siteId = resolveSunpower(sunpower)
@@ -83,7 +63,7 @@ const resolveBrandAndId = (infoObject) => {
                     resolverReturner.siteId = siteId
                     resolverReturner.type = type
                 }
-                break
+                break;
             default:
                 resolverReturner = null
         }
@@ -119,11 +99,15 @@ const resolveBrandAndId = (infoObject) => {
     } else {
         resolverReturner = null
     }
+    if(resolverReturner!==null) {
+        if(resolverReturner.siteId==null || resolverReturner.type==null) {
+            resolverReturner = null
+        }
+    }
     return resolverReturner
 }
 
 const resolveSolarEdge = (value) => {
-    // console.log(value)
     try {
         if (!value.includes('http')) {
             if (value === '' || value === '.') {
@@ -187,8 +171,6 @@ const resolveEnphase = (value) => {
 }
 
 const resolveSunpower = (value) => {
-    // console.log(`Sunpower value: ${value}`)
-    // console.log(value)
     try {
         if(value.includes('https')) {
             const firstSplit = value.split('sites/')
@@ -215,76 +197,58 @@ const resolveSunpower = (value) => {
         console.log("Error getting spr id")
         return null
     }
+}
+
+// adds a years array property to client for each pto year to fetch and its corresponding property Year_${year}_Actual_Production
+const resolveNeededProductionReportYears = (client) => {
+    let years = []
+    const {Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5} = client
+    const {PTO_Date} = client
+    const currentDate = new Date()
+    const ptoDate = new Date(PTO_Date)
+    const clientNeedsYears = (client.siteId!=null && client.type!=null)
+
+    let yearSelector;
+    let endDate;
+    for(let i=1 ; i <=5 ; i++ ) {
+        client[`Year_${i}_Actual_Production`] = null
+        if(clientNeedsYears) {
+            endDate = new Date(ptoDate)
+            endDate.setFullYear(ptoDate.getFullYear()+i)
+            if(endDate>currentDate) {
+                break;
+            }
+            if(i===1 || i===2) {
+                yearSelector = `Year_${i}_Production`
+            } else {
+                yearSelector = `Year_${i}`
+            }
     
-}
-
-const main = async () => {
-    try {
-        let data;
-        const zohoRes = await getZohoDataInTimeFrame(ZOHO_TIMEFRAME_START, ZOHO_TIMEFRAME_END)
-        if(zohoRes?.data) {
-            data = zohoRes.data
-        } else {
-            throw new Error("Zoho data not found")
-        }
-
-        
-        for(let client of data) {
-            console.log(client)
-            const returnedTypeAndId = resolveBrandAndId({
-                manufacturer: client['Inverter_Manufacturer']===null ? null : client['Inverter_Manufacturer'].toLowerCase(),
-                enphase: client['Enphase_Monitoring'],
-                solarEdge: client['SolarEdge_Monitoring'],
-                sunpower: client['Sunpower_Legacy_ID']
-            })
-            if (returnedTypeAndId == null || (returnedTypeAndId?.siteId==null && returnedTypeAndId?.type==null)) {
-                client.siteId = null
-                client.type = null
-            } else {
-                client.siteId = returnedTypeAndId.siteId
-                client.type = returnedTypeAndId.type
+            if(client[yearSelector] == null || client[yearSelector] == 0) {
+                years.push(i)
             }
-
-            if(client?.siteId==null) {
-                client["Actual_Production"] = -1
-                client[`Start_Date_Year_${PRODUCTION_TARGET_YEAR}`] = '01-01-2000'
-                client[`End_Date_Year_${PRODUCTION_TARGET_YEAR}`] = '01-01-2000'
-            } else {
-                const production = await getYearData(client.siteId, client["PTO_Date"], PRODUCTION_TARGET_YEAR, client.type, client["Deal_Name"])
-                if(typeof production.finalSum?.sum === 'number'){
-                    client["Actual_Production"] = Math.round(production.finalSum?.sum)
-                } else {
-                    client["Actual_Production"] = -70
-                }
-                client[`Start_Date_Year_${PRODUCTION_TARGET_YEAR}`] = production.startDate
-                client[`End_Date_Year_${PRODUCTION_TARGET_YEAR}`] = production.endDate
-            }
-
         }
-
-        const csvWriter = createCsvWriter({
-            path: `./data/Year_${PRODUCTION_TARGET_YEAR}_ZohoPtoYear_${ZOHO_PTO_YEAR}.csv`,
-            header: [
-                { id: 'id', title: 'ZohoID' },
-                { id: 'Deal_Name', title: 'Opportunity_Name' },
-                { id: 'PTO_Date', title: 'PTO_Date' },
-                { id: `Start_Date_Year_${PRODUCTION_TARGET_YEAR}`, title: `Production_Year_${PRODUCTION_TARGET_YEAR}_Start` },
-                { id: `End_Date_Year_${PRODUCTION_TARGET_YEAR}`, title: `Production_Year_${PRODUCTION_TARGET_YEAR}_End` },
-                { id: 'type', title: 'Manufacturer' },
-                { id: 'siteId', title: 'Site_ID' },
-                { id: 'Estimated_output_year_1', title: 'Estimated_Production' },
-                { id: 'Actual_Production', title: `Actual_Production_Year_${PRODUCTION_TARGET_YEAR}` },
-            ]
-        });
-        await csvWriter.writeRecords(data)
-        console.log(`CSV file written!!!`)
-            
-
-    } catch (error) {
-        console.log("there was an error in the main function!!!")
-        console.log(error.message)
     }
+    client.yearsToFill = years
+}
+
+// adds siteId, type, years (actual years to fetch), Year_i_Actual_Production
+const parseRawZohoSite = (client) => {
+    const returnedTypeAndId = resolveBrandAndId({
+        manufacturer: client['Inverter_Manufacturer']===null ? null : client['Inverter_Manufacturer'].toLowerCase(),
+        enphase: client['Enphase_Monitoring'],
+        solarEdge: client['SolarEdge_Monitoring'],
+        sunpower: client['Sunpower_Legacy_ID']
+    })
+    if (returnedTypeAndId === null) {
+        client.siteId = null
+        client.type = null
+    } else {
+        client.siteId = returnedTypeAndId.siteId
+        client.type = returnedTypeAndId.type
+    }
+    resolveNeededProductionReportYears(client)
 }
 
 
-main()
+module.exports = {parseRawZohoSite, resolveBrandAndId, resolvePtoDate, resolveProductionValue}

@@ -107,9 +107,10 @@ const getCurrentGraphqlToken = async () => {
         const energyUrl = `https://monitor.sunpower.com/#/sites/${siteId}/siteEnergy`
         await page.goto(energyUrl)
         await setTimeout(10000)
-        
+        return true
     } catch (error) {
         console.log(error)
+        return false
     } finally {
         await browser.close()
     }
