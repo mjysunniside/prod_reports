@@ -169,7 +169,10 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
             includeSiteWeather: false,
             skipEnergyItems: false
         };
-        const token = JSON.parse(fs.readFileSync("./data/graphqlToken.json"))["token"]
+        const currentDir = path.dirname(__filename)
+        const dataDir = path.join(currentDir, 'data')
+        const filepath = path.join(dataDir, 'graphqlToken.json')
+        const token = JSON.parse(fs.readFileSync(filepath))["token"]
         const responseDataOne = await fetch(GRAPHQL_URL, {
             method: 'POST',
             headers: {
@@ -182,7 +185,11 @@ const fetchSunpower = async (siteId, startDate, endDate) => {
             })
         });
         const responseData = await responseDataOne.json()
-        return responseData
+        if(!responseData?.data?.siteEnergy?.items) {
+          return null
+        }
+        const formattedData = formatSunpowerApiData(responseData)
+        return formattedData
     } catch (error) {
         console.log("Error in fetch SunPower: ", error.message)
         return null
@@ -259,9 +266,12 @@ const tokenIsExpired = async () => {
 
 const verifyToken = async () => {
     try {
-        if (!fs.existsSync("data") || !fs.existsSync("data/graphqlToken.json")) {
+        const currentDir = path.dirname(__filename)
+        const dataDir = path.join(currentDir, 'data')
+        const filepath = path.join(dataDir, 'graphqlToken.json')
+        if (!fs.existsSync(dataDir) || !fs.existsSync(filepath)) {
             await getCurrentGraphqlToken()
-        } else if (!checkIfGreaterThanHours(JSON.parse(fs.readFileSync("data/graphqlToken.json"))["age"])) {
+        } else if (!checkIfGreaterThanHours(JSON.parse(fs.readFileSync(filepath))["age"])) {
             await getCurrentGraphqlToken()
         } else {
             let tokenExpired = await tokenIsExpired()
@@ -282,6 +292,20 @@ const verifyToken = async () => {
         return false
     }
 
+}
+
+//formats the raw graphql api data by adding value prop expected in production report function
+const formatSunpowerApiData = (data) => {
+  try {
+    for(let interval of data?.data?.siteEnergy?.items) {
+      // "solarProductionValues" is the key for kWh interval value in spr api
+      interval.value = interval.solarProductionValues
+    } 
+    return data?.data?.siteEnergy?.items
+  } catch (error) {
+    console.log("Error in format sunpower api data: ", error.message)
+    return null
+  }
 }
 
 

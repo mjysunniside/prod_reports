@@ -209,9 +209,11 @@ const resolveNeededProductionReportYears = (client) => {
     const clientNeedsYears = (client.siteId!=null && client.type!=null)
 
     let yearSelector;
+    let actualYearSelector;
     let endDate;
     for(let i=1 ; i <=5 ; i++ ) {
-        client[`Year_${i}_Actual_Production`] = null
+        actualYearSelector = `Year_${i}_Actual_Production`
+        client[actualYearSelector] = null
         if(clientNeedsYears) {
             endDate = new Date(ptoDate)
             endDate.setFullYear(ptoDate.getFullYear()+i)
@@ -224,8 +226,11 @@ const resolveNeededProductionReportYears = (client) => {
                 yearSelector = `Year_${i}`
             }
     
+            // if the zoho record has null or zero we need to fetch production, otherwise append the old production to the object, this is only really necessary for comparison
             if(client[yearSelector] == null || client[yearSelector] == 0) {
                 years.push(i)
+            } else {
+                client[actualYearSelector] = client[yearSelector]
             }
         }
     }

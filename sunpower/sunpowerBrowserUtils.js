@@ -1,5 +1,5 @@
-// require('dotenv').config()
-require('dotenv').config({ path: "./spr.env" })
+require('dotenv').config({ path: "./main.env" })
+// require('dotenv').config({ path: "./spr.env" })
 const puppeteer = require('puppeteer')
 const { setTimeout } = require("node:timers/promises")
 const fs = require('fs')
@@ -10,6 +10,7 @@ const SPR_DASH = "https://monitor.sunpower.com/#/dashboard"
 
 const sprLogin = async (page) => {
     try {
+        setTimeout(10000)
         await page.type('#username', process.env.USERNAME_SUNPOWER)
         await page.type('#password', process.env.PASSWORD_SUNPOWER)
         await page.click('[title="Sign In"]')
@@ -59,7 +60,8 @@ const getCurrentGraphqlToken = async () => {
   
         let cookies = null
         const currentDir = path.dirname(__filename);
-        const filePath = path.join(currentDir, 'data/cookies.json');
+        const dataDir = path.join(currentDir, 'data')
+        const filePath = path.join(currentDir, 'cookies.json');
         if(fs.existsSync(filePath)) {
             cookies = JSON.parse(fs.readFileSync(filePath))
             page.setCookie(...cookies)
@@ -69,6 +71,7 @@ const getCurrentGraphqlToken = async () => {
         if (page.url() !== SPR_DASH) {
             await page.waitForSelector('[title="Sign In"]');
             await sprLogin(page)
+            await page.goto(SPR_DASH)
             if(page.url()!==SPR_DASH) {
                 throw new Error("Something went wrong logging in")
             }
@@ -109,7 +112,7 @@ const getCurrentGraphqlToken = async () => {
         await setTimeout(10000)
         return true
     } catch (error) {
-        console.log(error)
+        console.log("Error in SunPower get graphql token: ", error.message)
         return false
     } finally {
         await browser.close()

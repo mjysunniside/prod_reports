@@ -1,8 +1,10 @@
-const { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData } = require("./zohoApi/recordPuller")
+const { updateRecord, getPtoMonthData, firstDateOfMonth } = require("./zohoApi/recordPuller")
 const {parseRawZohoSite} = require("./utils/zohoDataResolverUtils")
 const {getYearData} = require('./utils/report');
 const { writeCSV } = require("./utils/writingCSVUtil");
 
+const firstDayObj = firstDateOfMonth()
+const START_DATE_REPLACE_PTO = firstDayObj.split('T')[0]
 
 const main = async () => {
     let zohoRawData;
@@ -19,10 +21,10 @@ const main = async () => {
             parseRawZohoSite(client)
             // add production for each year
             for(let year of client.years) {
-                const currentYearProductionReport = await getYearData(client.siteId, client["PTO_Date"], year, client.type, client["Deal_Name"])
-                // update the correct year with actual production, otherwise it should already be null
-                if(typeof production.finalSum?.sum === 'number'){
-                    client[`Year_${year}_Actual_Production`] = Math.round(production.finalSum?.sum)
+                const currentYearProductionReport = await getYearData(client.siteId, START_DATE_REPLACE_PTO, year, client.type, client["Deal_Name"])
+                // update the correct year with actual production, otherwise it should already be null (or a prefilled value from zoho)
+                if(currentYearProductionReport?.status==='success' && typeof currentYearProductionReport.finalSum?.sum === 'number'){
+                    client[`Year_${year}_Actual_Production`] = Math.round(currentYearProductionReport.finalSum?.sum)
                 }
             }
         }

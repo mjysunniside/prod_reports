@@ -208,7 +208,7 @@ const updateRecord = async (updateKeyValueArray) => {
     }
 }
 
-// return date obj based on execution date (scheduled)
+// return date obj based on execution date (scheduled) returns last day of previous month
 const targetMonth = () => {
     const now = new Date();
     const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 0)
@@ -216,6 +216,12 @@ const targetMonth = () => {
     // const isoString = lastDayOfPreviousMonth.toISOString();
     // const dateString = isoString.split('T')[0];
     return lastDayOfPreviousMonth
+}
+// return date obj first day of current month
+const firstDateOfMonth = () => {
+    const now = new Date();
+    const firstDayOfCurrentMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    return firstDayOfCurrentMonth
 }
 
 // returns the PREVIOUS months sites with pto in that month (or null)
@@ -251,4 +257,4 @@ const getPtoMonthData = async () => {
 
 
 
-module.exports = { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData }
+module.exports = { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData, firstDateOfMonth }
