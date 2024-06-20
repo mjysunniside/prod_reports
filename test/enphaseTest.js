@@ -1,4 +1,4 @@
-const {fetchEnphase} = require("../enphase/app")
+const {productionTest} = require("./productionTest")
 
 const testVerificationData = [
     {
@@ -30,16 +30,11 @@ const testVerificationData = [
     },
 ]
 
-const main = async () => {
-    try {
-        const data = await fetchEnphase(testVerificationData[0].monitoring, "2020-03-01", "2021-03-01")    
-        console.log(data[0])
-        console.log(data[data.length-1])
-    } catch (error) {
-        console.log(error.message)
-    }
-    
-    // console.log(data)
+const enphaseTest = async () => {
+    await productionTest(testVerificationData)
 }
 
-main()
+enphaseTest()
+
+
+module.exports = {enphaseTest}

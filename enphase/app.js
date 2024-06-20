@@ -1,4 +1,4 @@
-require("dotenv").config()
+require("dotenv").config({path: "main.env"})
 // require("dotenv").config({ path: "./enphase.env" })
 const fs = require('fs')
 const path = require('path');
@@ -18,54 +18,65 @@ MAX_RETRY_COUNT = 2
 const getAuthTokensEnphase = async () => {
   client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
   client_id_enphase = process.env.CLIENT_ID_ENPHASE
+  console.log(client_id_enphase)
   const enphaseGetTokenUrl = `https://api.enphaseenergy.com/oauth/token?grant_type=password&username=${process.env.USERNAME_ENPHASE}&password=${process.env.PASSWORD_ENPHASE}`
   id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
   encodedIdSecret = Buffer.from(id_secret_toEncode_enphase).toString('base64')
-
-  await axios.post(enphaseGetTokenUrl, null, {
-    headers: {
-      'Authorization': `Basic ${encodedIdSecret}`
-    }
-  })
-    .then(res => {
-      const currentDir = path.dirname(__filename);
-      const filePath = path.join(currentDir, 'tokens.json');
-      fs.writeFileSync(filePath, JSON.stringify(res.data))
+  try {
+   axios.post(enphaseGetTokenUrl, null, {
+      headers: {
+        'Authorization': `Basic ${encodedIdSecret}`
+      }
     })
-
+      .then(res => {
+        const currentDir = path.dirname(__filename);
+        const filePath = path.join(currentDir, 'tokens.json');
+        fs.writeFileSync(filePath, JSON.stringify(res.data))
+      })
+      return true  
+  } catch (error) {
+    console.log("error in get enphase access: ", error.message)
+    return false
+  }
 }
 
 const refreshEnphase = async () => {
   const currentDir = path.dirname(__filename);
   const filePath = path.join(currentDir, 'tokens.json');
-  if(!fs.existsSync(filePath)) {
-    await getAuthTokensEnphase()
+  if (!fs.existsSync(filePath)) {
+    const newTokens = await getAuthTokensEnphase()
   }
-  
   let refresh_token;
   const json = JSON.parse(fs.readFileSync(filePath))
   refresh_token = json["refresh_token"]
 
-  const REFRESH_URL_ENPHASE = `https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=${refresh_token}`
-  client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
-  client_id_enphase = process.env.CLIENT_ID_ENPHASE
-  id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
-  encodedIdSecret = Buffer.from(id_secret_toEncode_enphase).toString('base64')
+  try {
+    const REFRESH_URL_ENPHASE = `https://api.enphaseenergy.com/oauth/token?grant_type=refresh_token&refresh_token=${refresh_token}`
+    client_secret_enphase = process.env.CLIENT_SECRET_ENPHASE
+    client_id_enphase = process.env.CLIENT_ID_ENPHASE
+    id_secret_toEncode_enphase = client_id_enphase + ":" + client_secret_enphase
+    encodedIdSecret = Buffer.from(id_secret_toEncode_enphase).toString('base64')
 
-  await axios.post(REFRESH_URL_ENPHASE, null, {
-    headers: {
-      'Authorization': `Basic ${encodedIdSecret}`
-    }
-  })
-    .then(res => {
-      if (res?.data?.access_token) {
-        const currentDir = path.dirname(__filename);
-        const filePath = path.join(currentDir, 'tokens.json');
-        fs.writeFileSync(filePath, JSON.stringify(res.data))
-      } else {
-        throw new Error("Error in refresh function")
+    await axios.post(REFRESH_URL_ENPHASE, null, {
+      headers: {
+        'Authorization': `Basic ${encodedIdSecret}`
       }
     })
+      .then(res => {
+        if (res?.data?.access_token) {
+          const currentDir = path.dirname(__filename);
+          const filePath = path.join(currentDir, 'tokens.json');
+          fs.writeFileSync(filePath, JSON.stringify(res.data))
+        } else {
+          throw new Error("Error in enphase refresh function")
+        }
+      })
+      return true
+  } catch (e) {
+    console.log("error in refresh enphase", e.message)
+    return false
+  }
+
 }
 
 const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
@@ -73,7 +84,7 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
   let json;
   const currentDir = path.dirname(__filename);
   const filePath = path.join(currentDir, 'tokens.json');
-  if(fs.existsSync(filePath)) {
+  if (fs.existsSync(filePath)) {
     json = JSON.parse(fs.readFileSync(filePath))
     access_token = json["access_token"]
   } else {
@@ -82,9 +93,9 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
     access_token = json["access_token"]
   }
   // console.log(`Up top here is try ${retryCount}`)
+  const MAIN_ENPHASE_REQUEST_URL = `https://api.enphaseenergy.com/api/v4/systems/${siteId}/energy_lifetime?key=${process.env.API_KEY_ENPHASE}&start_date=${startDate}&end_date=${endDate}&production=all`
   try {
     let data;
-    const MAIN_ENPHASE_REQUEST_URL = `https://api.enphaseenergy.com/api/v4/systems/${siteId}/energy_lifetime?key=${process.env.API_KEY_ENPHASE}&start_date=${startDate}&end_date=${endDate}&production=all`
     const res = await axios.get(MAIN_ENPHASE_REQUEST_URL, {
       headers: {
         'Authorization': `Bearer ${access_token}`
@@ -106,20 +117,36 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
   catch (error) {
     const errorResData = error.response?.data
     if (typeof errorResData == 'undefined') {
-      throw new Error(`In fetch enphase it was not authentication issues. siteID: ${siteId}`)
+      console.log(`In fetch enphase it was not authentication issues. siteID: ${siteId}`)
+      return null
     }
-    if (retryCount < MAX_RETRY_COUNT) {
-      if (retryCount >= 1) {
-        await getAuthTokensEnphase()
-      } else {
-        await refreshEnphase()
+    const refreshTokens = await refreshEnphase()
+    if(!refreshTokens) {
+      const generateNewTokens = await getAuthTokensEnphase()
+      if(!generateNewTokens) {
+        return null
       }
-      json = JSON.parse(fs.readFileSync(filePath))
-      access_token = json['access_token']
-      return await fetchEnphase(siteId, startDate, endDate, retryCount + 1)
-    } else {
-      throw new Error(`Reached maximum retry county in fetch enphase, site id: ${siteId}`)
     }
+    json = JSON.parse(fs.readFileSync(filePath))
+    access_token = json["access_token"]
+    let finalAttempt = null
+    axios.get(MAIN_ENPHASE_REQUEST_URL, {
+      headers: {
+        'Authorization': `Bearer ${access_token}`
+      }
+    })
+    .then(res => {
+      if(res?.data?.production) {
+        finalAttempt = res.data.production
+      } else {
+        finalAttempt = null
+      }
+    })
+    .catch(e => {
+      console.log("error in fetch enphase catch block: ", e.message)
+      finalAttempt = null
+    })
+    return finalAttempt
   }
 }
 

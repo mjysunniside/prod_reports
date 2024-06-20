@@ -1,52 +1,13 @@
 const { verifyToken } = require("../sunpower/sunpowerMain")
 const { getYearData } = require('../utils/report')
 
-
-// make it 3 sites? sure...(increase later)
-//update production with one day missing end of period
-const testVerificationData = [
-    {
-        id: "2515235000039264015",
-        name: "Stan Neugebauer",
-        monitoring: "A_317390",
-        pto: "2021-06-10",
-        startingProdDate:"2021-07-01",
-        production: [5478, 8808],
-        monitoringType: "sunpower"
-    },
-    {
-        id: "2515235000037200011",
-        name: "Janet Gentry",
-        monitoring: "A_264800",
-        pto: "2021-08-12",
-        startingProdDate:"2021-09-01",
-        production: [19361, 18481],
-        monitoringType: "sunpower"
-    },
-    // first production value from zoho
-    {
-        id: "2515235000021133020",
-        name: "April Grimm",
-        monitoring: "A_263679",
-        pto: "2020-06-08",
-        startingProdDate:"2020-07-01",
-        production: [4172, 3891, 3753],
-        monitoringType: "sunpower"
-    },
-]
-
-const sunpowerTest = async () => {
-    const validToken = await verifyToken()
-    if(!validToken) {
-        console.log("TEST FAILURE: invalid sunpower graphql token")
+const productionTest = async (testData) => {
+    const testDataResult = await fetchBatchData(testData)
+    if(testDataResult==null) {
+        console.log("TEST FAILURE: Unable to pull test data")
         return
     }
-    const testData = await fetchBatchData()
-    if(testData==null) {
-        console.log("TEST FAILURE: Unable to pull SunPower data")
-        return
-    }
-    const testDataComparison = verifyData(testData)
+    const testDataComparison = verifyData(testDataResult, testData)
     if(testDataComparison) {
         console.log("FINAL TEST SUCCESS")
     } else {
@@ -54,16 +15,16 @@ const sunpowerTest = async () => {
     }
 }
 
-const fetchBatchData = async () => {
+const fetchBatchData = async (testData) => {
     try {
         const returnObj = []
-        for (let client of testVerificationData) {
+        for (let client of testData) {
             // const data = fetchSunpower()
             // client[]
             let testClientData = { testClientYears: [], id: client.id }
 
             for (const [index, yearValue] of client.production.entries()) {
-                const currentYearProduction = await getYearData(client.monitoring, client.startingProdDate, index+1, "sunpower", client.name)
+                const currentYearProduction = await getYearData(client.monitoring, client.startingProdDate, index+1, client.monitoringType, client.name)
                 // console.log(currentYearProduction)
                 if (currentYearProduction?.returnStatus == 'success' && currentYearProduction?.finalSum != null) {
                     testClientData.testClientYears.push(Math.round(currentYearProduction?.finalSum?.sum))
@@ -76,12 +37,12 @@ const fetchBatchData = async () => {
         }
         return returnObj
     } catch (e) {
-        console.log("Error in spr test fetch batch data: ", e.message)
+        console.log("Error in enphase test fetch batch data: ", e.message)
         return null
     }
 }
 
-const verifyData = (testData) => {
+const verifyData = (testData, testVerificationData) => {
     let returnValue = true;
     for (let testClient of testData) {
         const currentTestZohoId = testClient.id
@@ -115,6 +76,4 @@ const checkArrayEquality = (arr1, arr2) => {
     }
 }
 
-sunpowerTest()
-
-module.exports = {sunpowerTest}
+module.exports = {productionTest}

@@ -217,6 +217,17 @@ const targetMonth = () => {
     // const dateString = isoString.split('T')[0];
     return lastDayOfPreviousMonth
 }
+
+//returns the last date of the last month one year previous
+function targetDate() {
+    let currentDate = new Date();
+    let oneYearAgo = new Date(currentDate);
+    oneYearAgo.setFullYear(currentDate.getFullYear() - 1);
+
+    oneYearAgo.setDate(0);
+    return oneYearAgo
+}
+
 // return date obj first day of current month
 const firstDateOfMonth = () => {
     const now = new Date();
@@ -245,7 +256,7 @@ const getPtoMonthData = async () => {
         
         const resultFilterForPtoMonth = result.filter(site => {
             const ptoDate = new Date(site["PTO_Date"])
-            return ptoDate.getMonth() === targetDate.getMonth()
+            return ptoDate.getMonth() === targetDate.getMonth() && ptoDate.getFullYear()<=targetDate.getFullYear()-1
         })
         return resultFilterForPtoMonth
     } catch (error) {
@@ -257,4 +268,4 @@ const getPtoMonthData = async () => {
 
 
 
-module.exports = { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData, firstDateOfMonth }
+module.exports = { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData, firstDateOfMonth, targetDate }

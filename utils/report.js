@@ -9,6 +9,8 @@ const getYearData = async (siteId, productionStartDate, year, monitoring_company
     console.log(`in the production report function site id is: ${siteId}`)
     try {
         const [startDate, endDate] = getProductionYear(productionStartDate, year)
+        // console.log("Start: ", startDate)
+        // console.log("End: ", endDate)
         const data = await fetchData(siteId, startDate, endDate, monitoring_company)
         let finalSum;
         if (data==null || !data) {
@@ -59,21 +61,41 @@ const fetchData = async (siteId, startDate, endDate, monitoring_company) => {
     
 }
 
+// const getProductionYear = (ptoDate, year) => {
+//     const ptoDateObject = new Date(ptoDate)
+//     const currentDate = new Date()
+//     let startDate = new Date(ptoDate)
+//     let endDate = new Date(ptoDate)
+
+//     startDate.setFullYear(ptoDateObject.getFullYear() + (year - 1))
+//     endDate.setFullYear(ptoDateObject.getFullYear() + year)
+
+//     if (startDate > currentDate || endDate > currentDate) {
+//         throw new Error(`The requested production year is out of bounds\t startDate: ${startDate} -- endDate: ${endDate}`)
+//     }
+
+//     return [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]
+// }
 const getProductionYear = (ptoDate, year) => {
-    const ptoDateObject = new Date(ptoDate)
-    const currentDate = new Date()
-    let startDate = new Date(ptoDate)
-    let endDate = new Date(ptoDate)
+    const ptoDateObject = new Date(ptoDate);
+    const currentDate = new Date();
 
-    startDate.setFullYear(ptoDateObject.getFullYear() + (year - 1))
-    endDate.setFullYear(ptoDateObject.getFullYear() + year)
+    const startYear = ptoDateObject.getFullYear() + (year - 1);
+    const endYear = ptoDateObject.getFullYear() + year;
 
-    if (startDate > currentDate || endDate > currentDate) {
-        throw new Error(`The requested production year is out of bounds\t startDate: ${startDate} -- endDate: ${endDate}`)
+    // Initialize startDate and endDate using only date components
+    const startDate = new Date(Date.UTC(startYear, ptoDateObject.getUTCMonth(), ptoDateObject.getUTCDate()));
+    const endDate = new Date(Date.UTC(endYear, ptoDateObject.getUTCMonth(), ptoDateObject.getUTCDate()));
+
+    // Create currentDate without time components
+    const currentDateUTC = new Date(Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), currentDate.getUTCDate()));
+
+    if (startDate > currentDateUTC || endDate > currentDateUTC) {
+        throw new Error(`The requested production year is out of bounds\t startDate: ${startDate.toISOString().split('T')[0]} -- endDate: ${endDate.toISOString().split('T')[0]}`);
     }
 
-    return [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]
-}
+    return [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]];
+};
 
 // if a year from "date" is in future return null
 const getAYearFromDate = (date) => {
