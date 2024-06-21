@@ -1,7 +1,10 @@
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const path = require("path")
 const date = new Date()
-const sanitizedDate = sanitizeDate(date);
+const sanitizeDate = (date) => {
+    return date.toISOString().replace(/:/g, '-');
+}
+const sanitizedDate = sanitizeDate(date)
 
 
 // the schema is an array like this [{ id: 'nameInDataObj', title: 'desiredNameInCSVoutput' }]
@@ -33,9 +36,5 @@ const getStandardSchema = () => {
         { id: 'Year_5_Actual_Production', title: `year5` },
     ]
 }
-
-const sanitizeDate = (date) => {
-    return date.toISOString().replace(/:/g, '-');
-};
 
 module.exports = {writeCSV, getStandardSchema}

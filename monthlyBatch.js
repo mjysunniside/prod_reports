@@ -2,11 +2,13 @@ const { updateRecord, getPtoMonthData, firstDateOfMonth } = require("./zohoApi/r
 const {parseRawZohoSite} = require("./utils/zohoDataResolverUtils")
 const {getYearData} = require('./utils/report');
 const { writeCSV } = require("./utils/writingCSVUtil");
+const { performance } = require('perf_hooks');
 
 const firstDayObj = firstDateOfMonth()
 const START_DATE_REPLACE_PTO = firstDayObj.split('T')[0]
 
 const main = async () => {
+    const start = performance.now()
     let zohoRawData;
     try {
         const zohoGetDataReturn = await getPtoMonthData()
@@ -46,6 +48,9 @@ const main = async () => {
 
         //writing csv, the zohoRawData now has all the necessary keys for the csv standard schema
         await writeCSV(zohoRawData)
+
+        const end = performance.now()
+        console.log(`Execution time: ${(end - start).toFixed(3)} milliseconds`);
 
     } catch (error) {
         console.log("Error in main: ", error.message)

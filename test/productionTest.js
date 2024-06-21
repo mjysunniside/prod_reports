@@ -5,13 +5,15 @@ const productionTest = async (testData) => {
     const testDataResult = await fetchBatchData(testData)
     if(testDataResult==null) {
         console.log("TEST FAILURE: Unable to pull test data")
-        return
+        return false
     }
     const testDataComparison = verifyData(testDataResult, testData)
     if(testDataComparison) {
         console.log("FINAL TEST SUCCESS")
+        return true
     } else {
         console.log("FINAL TEST FAILURE")
+        return false
     }
 }
 

@@ -1,45 +1,17 @@
-const {fetchEnphase} = require("../enphase/app")
+const { getAccessAndRefresh, getRefresh,updateRecord, getPtoMonthData, firstDateOfMonth, getZohoDataInTimeFrame, targetMonth } = require("../zohoApi/recordPuller")
+const { performance } = require('perf_hooks');
 
-const testVerificationData = [
-    {
-        id: "2515235000016331015",
-        name: "Tim Ogburn",
-        monitoring: "1762686",
-        pto: "2020-02-04",
-        startingProdDate:"2020-03-01",
-        production: [4581, 4875, 4280, 1217],
-        monitoringType: "enphase"
-    },
-    {
-        id: "2515235000037951034",
-        name: "Tim Barribeau",
-        monitoring: "2282000",
-        pto: "2021-08-06",
-        startingProdDate:"2021-09-01",
-        production: [6872, 6381],
-        monitoringType: "enphase"
-    },
-    {
-        id: "2515235000035491037",
-        name: "Kim Rafter",
-        monitoring: "2193681",
-        pto: "2021-04-21",
-        startingProdDate:"2021-05-01",
-        production: [13919, 12360, 11899],
-        monitoringType: "enphase"
-    },
-]
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 const main = async () => {
-    try {
-        const data = await fetchEnphase(testVerificationData[0].monitoring, "2020-03-01", "2021-03-01")    
-        console.log(data[0])
-        console.log(data[data.length-1])
-    } catch (error) {
-        console.log(error.message)
-    }
-    
-    // console.log(data)
+    const start = performance.now()
+    await delay(10000)
+    console.log(targetMonth().toISOString())
+    const end = performance.now()
+    console.log(`Execution time: ${(end - start).toFixed(3)} milliseconds`);
 }
 
 main()

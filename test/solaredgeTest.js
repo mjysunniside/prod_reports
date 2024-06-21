@@ -7,7 +7,7 @@ const testVerificationData = [
         monitoring: "2327076",
         pto: "2021-08-05",
         startingProdDate:"2021-09-01",
-        production: [12974, 12058],
+        production: [12974, 12057],
         monitoringType: "solaredge"
     },
     {
@@ -25,14 +25,17 @@ const testVerificationData = [
         monitoring: "2198868",
         pto: "2021-03-18",
         startingProdDate:"2021-04-01",
-        production: [6361, 7071, 7661],
+        production: [6360, 7070, 7661],
         monitoringType: "solaredge"
     },
 ]
 
-const testSolaredge = async () => {
-    await productionTest(testVerificationData)
+const solaredgeTest = async () => {
+    const solaredgeResult = await productionTest(testVerificationData)
+    if(!solaredgeResult) {
+        return false    
+    }
+    return true
 }
 
-
-module.exports = {testSolaredge}
+module.exports = {solaredgeTest}

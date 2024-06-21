@@ -32,7 +32,7 @@ const resolveBrandAndId = (infoObject) => {
     let type;
     let siteId;
     let resolverReturner = {};
-    if (manufacturer !== '' && manufacturer !== '.') {
+    if (manufacturer!==null && manufacturer !== '' && manufacturer !== '.') {
         switch (manufacturer) {
             case "solaredge":
                 type = "solaredge"
@@ -67,7 +67,7 @@ const resolveBrandAndId = (infoObject) => {
             default:
                 resolverReturner = null
         }
-    } else if (solarEdge !== '' && solarEdge !== '.' && solarEdge !== '0') {
+    } else if (solarEdge !== '' && solarEdge !== '.' && solarEdge !== '0' && solarEdge!==null) {
         type = "solaredge"
         siteId = resolveSolarEdge(solarEdge)
         
@@ -77,7 +77,7 @@ const resolveBrandAndId = (infoObject) => {
             resolverReturner.siteId = siteId
             resolverReturner.type = type
         }
-    } else if (enphase !== '' && enphase !== '.' && enphase !== '0') {
+    } else if (enphase !== '' && enphase !== '.' && enphase !== '0' && enphase!==null) {
         type = "enphase"
         siteId = resolveEnphase(enphase)
         if (siteId == null) {
@@ -86,7 +86,7 @@ const resolveBrandAndId = (infoObject) => {
             resolverReturner.siteId = siteId
             resolverReturner.type = type
         }
-    } else if (sunpower !== '' && sunpower !== '.' && sunpower !== '0') {
+    } else if (sunpower !== '' && sunpower !== '.' && sunpower !== '0' && sunpower!==null) {
         // console.log(`we should be hitting this rn`)
         type = "sunpower"
         siteId = resolveSunpower(sunpower)
@@ -125,11 +125,14 @@ const resolveSolarEdge = (value) => {
 
             if(!hashSplit[1]) {
                 const slashSplit = array[1].split('/')
-                if(!slashSplit[1]) {
+                if(!slashSplit[1] && array[1].charAt(array[1].length-1)!=='/') {
                     return array[1]
                 } else {
                     return slashSplit[0]
                 }
+            }
+            if(hashSplit[0].charAt(hashSplit[0].length - 1)==='/') {
+                return hashSplit[0].slice(0, -1)
             }
             return hashSplit[0]
         }    
@@ -142,20 +145,37 @@ const resolveSolarEdge = (value) => {
 }
 
 const resolveEnphase = (value) => {
-    // console.log(`Enphase value: ${value}`)
     try {
+        if(value===null) {
+            return null
+        }
         // console.log(value)
         if (!value.includes('http')) {
             if (value === '' || value === '.') {
                 return null
             } else {
-                return value
+                if(/^\d+$/.test(value)) {
+                    return value
+                } else {
+                    return null
+                }
             }
         } else {
             const array = value.split('systems/')
 
             if(!array[1]) {
-                throw new Error("problem with enphase id resolver")
+                const lastSlash = value.lastIndexOf('/')
+                if(lastSlash===-1) {
+                    if(/^\d+$/.test(value)) {
+                        return value
+                    }
+                    return null
+                }
+                const afterLastSlash = value.slice(lastSlash+1)
+                if(/^\d+$/.test(afterLastSlash)) {
+                    return afterLastSlash
+                }
+                return null
             }
             
             const secondSplit = array[1].split('/arrays')
@@ -164,7 +184,7 @@ const resolveEnphase = (value) => {
             return id
         }
     } catch (error) {
-        console.log('unable to find enphase')
+        console.log('unable to find enphase: ', value)
         return null
     }
     
@@ -183,14 +203,22 @@ const resolveSunpower = (value) => {
             } else {
                 return secondSplit[0]
             }
-        } else if (!value.includes('A_')) {
-            if (value === '' || value === '.') {
+        } else if (!value.includes('A_') && !value.includes("E_")) {
+            if (value === '' || value === '.' || value==='0') {
                 return null
             } else {
-                return value
+                if(/^\d+$/.test(value)) {
+                    return value
+                } else {
+                    return null
+                }
             }
         } else {
-            return value
+            if(/^\d+$/.test(value.slice(2))) {
+                return value
+            } else {
+                return null
+            }
         }
         
     } catch (error) {

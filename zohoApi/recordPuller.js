@@ -60,6 +60,12 @@ const getRefresh = async () => {
         })
 
         // we can assume dataDir exists at this point other wise error thrown earlier
+        if(response?.data?.error === "invalid_code") {
+            throw new Error("Invalid code error in zoho refresh")
+        } else {
+            // response on refresh does not contain refresh (it never updates)
+            response.data["refresh_token"] = ZOHO_REFRESH_TOKEN
+        }
         fs.writeFileSync(tokenFile, JSON.stringify(response?.data))
         return true
     } catch (error) {
@@ -121,7 +127,7 @@ const getZohoData = async (query) => {
 
 const getZohoDataInTimeFrame = async (startDate, endDate) => {
     try {
-        const query = `select id, Deal_Name, PTO_Date, Inverter_Manufacturer, Enphase_Monitoring, SolarEdge_Monitoring, Sunpower_Legacy_ID, Estimated_output_year_1, Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5 from Deals where ((((PTO_Date is not null) and (PTO_Date between '${startDate}' and '${endDate}')) and (Project_Type not in ('Residential Storage', 'Generator Only', 'Commercial Storage', 'Off-Grid Service', 'Service Only'))) and (((Sunpower_Legacy_ID is not null) or (SolarEdge_Monitoring is not null)) or Enphase_Monitoring is not null)) order by Deal_Name limit 0, 2000`
+        const query = `select id, Deal_Name, PTO_Date, Inverter_Manufacturer, Enphase_Monitoring, SolarEdge_Monitoring, Sunpower_Legacy_ID, Estimated_output_year_1, Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5 from Deals where ((((PTO_Date is not null) and (PTO_Date between '${startDate}' and '${endDate}')) and (Project_Type not in ('Residential Storage', 'Generator Only', 'Commercial Storage', 'Off-Grid Service', 'Service Only', 'Off-Grid',  'Off-Grid Expansion'))) and (((Sunpower_Legacy_ID is not null) or (SolarEdge_Monitoring is not null)) or Enphase_Monitoring is not null)) order by Deal_Name limit 0, 2000`
         const data = await getZohoData(query)
         if(!data) {
             throw new Error("Problem retrieving zoho records...")
@@ -187,24 +193,29 @@ const updateRecord = async (updateKeyValueArray) => {
                         Authorization: `Zoho-oauthtoken ${ZOHO_ACCESS_TOKEN}`
                     }
                 })
+                console.log(res)
             }
         } else {
             const updateData = {
                 data: updateKeyValueArray
             }
-            const res = await axios.put("https://www.zohoapis.com/crm/v5/Leads", updateData, {
+            const res = await axios.put("https://www.zohoapis.com/crm/v5/Deals", updateData, {
                 headers: {
                     Authorization: `Zoho-oauthtoken ${ZOHO_ACCESS_TOKEN}`
                 }
             })
         }
+        return true
     } catch (e) {
-        console.log("there was an error updating zoho records")
+        console.log("there was an error updating zoho records: ")
         if (e.isAxiosError) {
-            console.log(e.request.data)
+            console.log("axios error")
+            console.log(e.message)
         } else {
+            console.log("not axios")
             console.log(e.message)
         }
+        return false
     }
 }
 
@@ -268,4 +279,4 @@ const getPtoMonthData = async () => {
 
 
 
-module.exports = { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData, firstDateOfMonth, targetDate }
+module.exports = { getAccessAndRefresh, getRefresh, getZohoData, getZohoDataInTimeFrame, getZohoDataMiles, updateRecord, getPtoMonthData, firstDateOfMonth, targetDate, targetMonth }

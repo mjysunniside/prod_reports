@@ -1,6 +1,5 @@
-const { updateRecord, getPtoMonthData, firstDateOfMonth, getZohoDataInTimeFrame } = require("../zohoApi/recordPuller")
+const { getRefresh,updateRecord, getPtoMonthData, firstDateOfMonth, getZohoDataInTimeFrame } = require("../zohoApi/recordPuller")
 const {parseRawZohoSite} = require("../utils/zohoDataResolverUtils")
-const {getYearData} = require('../utils/report');
 const { writeCSV } = require("../utils/writingCSVUtil");
 
 const START_DATE = "2021-01-01"
@@ -28,3 +27,4 @@ const testParse = async () => {
 }
 
 testParse()
+// getRefresh()

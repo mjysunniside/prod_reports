@@ -31,10 +31,12 @@ const testVerificationData = [
 ]
 
 const enphaseTest = async () => {
-    await productionTest(testVerificationData)
+    const enphaseResult = await productionTest(testVerificationData)
+    if(!enphaseResult) {
+        return false
+    }
+    return true
 }
-
-enphaseTest()
 
 
 module.exports = {enphaseTest}
