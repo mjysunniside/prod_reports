@@ -116,7 +116,7 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
   }
   catch (error) {
     const errorResData = error.response?.data
-    if (typeof errorResData == 'undefined') {
+    if (typeof errorResData === 'undefined') {
       console.log(`In fetch enphase it was not authentication issues. siteID: ${siteId}`)
       return null
     }
@@ -137,7 +137,15 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
     })
     .then(res => {
       if(res?.data?.production) {
-        finalAttempt = res.data.production
+        console.log("final attempt enphase working")
+        finalAttempt = res.data.production.map((value, index) => {
+          const dateObj = new Date(startDate);
+          dateObj.setDate(dateObj.getDate() + index);
+          return {
+            date: dateObj,
+            value: (value / 1000)
+          }
+        })
       } else {
         finalAttempt = null
       }

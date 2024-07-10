@@ -12,6 +12,7 @@ const getYearData = async (siteId, productionStartDate, year, monitoring_company
         // console.log("Start: ", startDate)
         // console.log("End: ", endDate)
         const data = await fetchData(siteId, startDate, endDate, monitoring_company)
+        // console.log(data)
         let finalSum;
         if (data==null || !data) {
             finalSum = null

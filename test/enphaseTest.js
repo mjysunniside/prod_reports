@@ -38,5 +38,5 @@ const enphaseTest = async () => {
     return true
 }
 
-
+enphaseTest()
 module.exports = {enphaseTest}

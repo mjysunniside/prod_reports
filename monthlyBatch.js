@@ -3,9 +3,12 @@ const {parseRawZohoSite} = require("./utils/zohoDataResolverUtils")
 const {getYearData} = require('./utils/report');
 const { writeCSV } = require("./utils/writingCSVUtil");
 const { performance } = require('perf_hooks');
+const fs = require('fs')
 
-const firstDayObj = firstDateOfMonth()
-const START_DATE_REPLACE_PTO = firstDayObj.split('T')[0]
+const firstDayObj = firstDateOfMonth().toISOString()
+const START_DATE_DAY_MONTH = firstDayObj.split('T')[0]
+//temp
+const CURRENT_SLICE = [0,5]
 
 const main = async () => {
     const start = performance.now()
@@ -16,35 +19,48 @@ const main = async () => {
             throw new Error("Issue fetching data from zoho")
         } else {
             zohoRawData = zohoGetDataReturn
+            // zohoRawData = zohoGetDataReturn.slice(CURRENT_SLICE[0],CURRENT_SLICE[1])
         }
 
         for(let client of zohoRawData) {
             // parses messy zoho data and adds corresponding properties necessary to pull data
-            parseRawZohoSite(client)
+            // console.log(client)
+            parseRawZohoSite(client, new Date(START_DATE_DAY_MONTH))
+            // console.log(client)
+            // process.exit()
             // add production for each year
-            for(let year of client.years) {
-                const currentYearProductionReport = await getYearData(client.siteId, START_DATE_REPLACE_PTO, year, client.type, client["Deal_Name"])
+            for(let year of client.yearsToFill) {
+                const currentYearProductionReport = await getYearData(client.siteId, client["target_pto"], year, client.type, client["Deal_Name"])
                 // update the correct year with actual production, otherwise it should already be null (or a prefilled value from zoho)
-                if(currentYearProductionReport?.status==='success' && typeof currentYearProductionReport.finalSum?.sum === 'number'){
-                    client[`Year_${year}_Actual_Production`] = Math.round(currentYearProductionReport.finalSum?.sum)
+                if(currentYearProductionReport?.returnStatus==='success'){
+                    if(typeof currentYearProductionReport.finalSum?.sum === 'number') {
+                        client[`Year_${year}_Actual_Production`] = Math.round(currentYearProductionReport.finalSum?.sum)
+                    } else {
+                        // note about this line!!! null response from get year is returning 0 (this could potentially be incorrect if there was an error with api -- this means it will reinitialize sites known to be 0 with 0)
+                        client[`Year_${year}_Actual_Production`] = 0
+                    }
                 }
             }
         }
-        // here in production we do this differently
-
-        // update zohoRecords DO NOT UNCOMMENT!!!
-        // const rawDataFormatted = zohoRawData.filter(client => client.years.length>0).map(client => {
-        //     let newFormattedClient = {id: client.id};
-        //     for(let year of client.years) {
-        //         if(year===1 || year===2) {
-        //             newFormattedClient[``]
-        //         }
-        //     }
-        // })
-        // when un comment check format first
+        // here in production we do this differently (check for env?)
+        const rawDataFormatted = zohoRawData.filter(client => client.yearsToFill.length>0).map(client => {
+            let newFormattedClient = {id: client.id};
+            for(let year of client.yearsToFill) {
+                let yearSelectorString;
+                if(year===1 || year===2) {
+                    yearSelectorString = `Year_${year}_Production` 
+                } else {
+                    yearSelectorString = `Year_${year}`
+                }
+                newFormattedClient[yearSelectorString] = client[`Year_${year}_Actual_Production`]
+                return newFormattedClient
+            }
+        })
+        console.log(`Number of records being updated: ${rawDataFormatted.length}`)
+        fs.writeFileSync('./data/formattedData.json', JSON.stringify(rawDataFormatted, null, 2));
         // console.log(rawDataFormatted)
+        // THIS LINE UPDATES ZOHO (CAREFUL!)
         // await updateRecord(rawDataFormatted)
-
 
         //writing csv, the zohoRawData now has all the necessary keys for the csv standard schema
         await writeCSV(zohoRawData)

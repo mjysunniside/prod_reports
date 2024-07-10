@@ -14,6 +14,7 @@ const client1 = {
 
 const mainTestZohoUpdate = async () => {
     try {
+        await getRefresh()
         const result1 = await updateRecord([{id: milesYoungId, Year_1_Production: 100}])
         if(!result1) {
             throw new Error("First zoho update failed")
@@ -24,10 +25,10 @@ const mainTestZohoUpdate = async () => {
         }
 
         const res = await getZohoDataMiles()
-        console.log(res[0].Year_1_Production)
         if(res[0]?.Year_1_Production!==200) {
             throw new Error("Production updated incorrectly")
         }
+        console.log("Zoho update test Success!!!")
         return true
     } catch (error) {
         console.log("Error in main zoho update test: ", error.message)
@@ -36,7 +37,7 @@ const mainTestZohoUpdate = async () => {
 }
 
 
-// main()
-getRefresh()
+// mainTestZohoUpdate()
+// getRefresh()
 
 module.exports = {mainTestZohoUpdate}

@@ -1,17 +1,18 @@
 const { getAccessAndRefresh, getRefresh,updateRecord, getPtoMonthData, firstDateOfMonth, getZohoDataInTimeFrame, targetMonth } = require("../zohoApi/recordPuller")
 const { performance } = require('perf_hooks');
-
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+const {getYearData} = require('../utils/report')
+const {fetchSunpower} = require('../sunpower/sunpowerMain')
 
 
 const main = async () => {
-    const start = performance.now()
-    await delay(10000)
-    console.log(targetMonth().toISOString())
-    const end = performance.now()
-    console.log(`Execution time: ${(end - start).toFixed(3)} milliseconds`);
+    const id = "A_169680"
+    const start = "2021-07-01"
+    const end = "2022-07-01"
+    const year = 2
+    const monitoring_company = "sunpower"
+    const name = "Alison Sweetser Expansion"
+    const res = await fetchSunpower(id, start, end)
+    console.log(res)
 }
 
 main()

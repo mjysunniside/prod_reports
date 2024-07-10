@@ -15,6 +15,7 @@ const fetchSolarEdge = async (siteId, startDate, endDate) => {
 
         return data
     } catch (error) {
+        // console.log(error.message)
         return null
     }
 

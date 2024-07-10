@@ -208,7 +208,7 @@ const resolveSunpower = (value) => {
                 return null
             } else {
                 if(/^\d+$/.test(value)) {
-                    return value
+                    return "A_" + value
                 } else {
                     return null
                 }
@@ -231,9 +231,9 @@ const resolveSunpower = (value) => {
 const resolveNeededProductionReportYears = (client) => {
     let years = []
     const {Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5} = client
-    const {PTO_Date} = client
+    const {target_pto} = client
     const currentDate = new Date()
-    const ptoDate = new Date(PTO_Date)
+    const ptoDate = new Date(target_pto)
     const clientNeedsYears = (client.siteId!=null && client.type!=null)
 
     let yearSelector;
@@ -255,7 +255,7 @@ const resolveNeededProductionReportYears = (client) => {
             }
     
             // if the zoho record has null or zero we need to fetch production, otherwise append the old production to the object, this is only really necessary for comparison
-            if(client[yearSelector] == null || client[yearSelector] == 0) {
+            if(client[yearSelector] == null || client[yearSelector] === 0) {
                 years.push(i)
             } else {
                 client[actualYearSelector] = client[yearSelector]
@@ -265,8 +265,16 @@ const resolveNeededProductionReportYears = (client) => {
     client.yearsToFill = years
 }
 
-// adds siteId, type, years (actual years to fetch), Year_i_Actual_Production
-const parseRawZohoSite = (client) => {
+const setClientTargetPto = (client, targetDayMonth) => {
+    const ptoObj = new Date(client["PTO_Date"])
+    targetDayMonth.setFullYear(ptoObj.getFullYear())
+    const ptoTargetDateString = targetDayMonth.toISOString().split('T')[0]
+    client["target_pto"] = ptoTargetDateString
+}
+
+// adds siteId, type, years (actual years to fetch), Year_i_Actual_Production, note that this also takes taget first day of current month
+const parseRawZohoSite = (client, targetDayMonth) => {
+    setClientTargetPto(client, targetDayMonth)
     const returnedTypeAndId = resolveBrandAndId({
         manufacturer: client['Inverter_Manufacturer']===null ? null : client['Inverter_Manufacturer'].toLowerCase(),
         enphase: client['Enphase_Monitoring'],

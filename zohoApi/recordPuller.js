@@ -148,7 +148,10 @@ const getZohoDataMiles = async (startDate, endDate) => {
     try {
         const query = `select id, Deal_Name, PTO_Date, Inverter_Manufacturer, Enphase_Monitoring, SolarEdge_Monitoring, Sunpower_Legacy_ID, Estimated_output_year_1, Year_1_Production, Year_2_Production, Year_3, Year_4, Year_5 from Deals where Deal_Name="Miles Young"`
         const data = await getZohoData(query)
-        return data.data
+        if(!data) {
+            throw new Error("Query not defined")
+        }
+        return data
     } catch (error) {
         console.log("Error in get miles data: ", error.message)
         return null
