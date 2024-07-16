@@ -15,10 +15,39 @@ const fetchSolarEdge = async (siteId, startDate, endDate) => {
 
         return data
     } catch (error) {
-        // console.log(error.message)
+        console.log("fetch solaredge error: ", error.message)
         return null
     }
 
 }
 
-module.exports = { fetchSolarEdge }
+const fetchSolaredgeBulk = async (siteIds, startDate, endDate) => {
+    let data;
+    let siteIdsString = "";
+    for(let id of siteIds) {
+        siteIdsString += id + ","
+    }
+    try {
+        const MAIN_SOLAREDGE_REQUEST_URL = `https://monitoringapi.solaredge.com/sites/${siteIdsString}/energy?timeUnit=DAY&endDate=${endDate}&startDate=${startDate}&api_key=${process.env.SOLAREDGE_API_KEY}`
+        await axios.get(MAIN_SOLAREDGE_REQUEST_URL)
+            .then(res => {
+                data = res.data.energy.list.map(site => {
+                    let returnSiteValue = {siteId: site.id}
+                    if(site.values) {
+
+                    } else {
+
+                    }
+                    return { date: new Date(value.date), value: (value.value / 1000) }
+                })
+            })
+
+        return data
+    } catch (error) {
+        console.log("fetch solaredge error: ", error.message)
+        return null
+    }
+
+}
+
+module.exports = { fetchSolarEdge, fetchSolaredgeBulk }

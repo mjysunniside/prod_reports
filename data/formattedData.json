@@ -1,7 +1,7 @@
 [
   {
     "id": "2515235000020544017",
-    "Year_1_Production": 12012
+    "Year_1_Production": null
   },
   {
     "id": "2515235000077649009",
@@ -9,47 +9,49 @@
   },
   {
     "id": "2515235000036477192",
-    "Year_2_Production": 5689
+    "Year_2_Production": 5689,
+    "Year_3": 5697
   },
   {
     "id": "2515235000080665242",
-    "Year_1_Production": 11971
+    "Year_1_Production": null
   },
   {
     "id": "2515235000027092120",
-    "Year_2_Production": 13741
+    "Year_2_Production": null,
+    "Year_3": null
   },
   {
     "id": "2515235000017462014",
-    "Year_2_Production": 5766
+    "Year_2_Production": 5766,
+    "Year_3": 5351,
+    "Year_4": 5582
   },
   {
     "id": "2515235000021133020",
-    "Year_3": 3753
+    "Year_3": 3753,
+    "Year_4": 3860
   },
   {
     "id": "2515235000001022836",
-    "Year_4": 0
+    "Year_4": 16144,
+    "Year_5": 15500
   },
   {
     "id": "2515235000057653010",
-    "Year_2_Production": 11861
+    "Year_2_Production": null
   },
   {
     "id": "2515235000061997211",
-    "Year_2_Production": 10284
+    "Year_2_Production": null
   },
   {
     "id": "2515235000077948224",
-    "Year_1_Production": 10509
+    "Year_1_Production": null
   },
   {
     "id": "2515235000078741001",
     "Year_1_Production": 14820
-  },
-  {
-    "id": "2515235000088119004",
-    "Year_1_Production": 15192
   },
   {
     "id": "2515235000081564019",
@@ -57,39 +59,43 @@
   },
   {
     "id": "2515235000001864011",
-    "Year_4": 0
+    "Year_4": 9169,
+    "Year_5": 8943
   },
   {
     "id": "2515235000091432506",
-    "Year_1_Production": 12275
+    "Year_1_Production": null
   },
   {
     "id": "2515235000064045199",
-    "Year_2_Production": 8511
+    "Year_2_Production": null
   },
   {
     "id": "2515235000001027722",
-    "Year_4": 0
+    "Year_3": 3262,
+    "Year_4": 2790,
+    "Year_5": 0
   },
   {
     "id": "2515235000007534059",
-    "Year_3": 5778
+    "Year_3": null,
+    "Year_4": null,
+    "Year_5": null
   },
   {
     "id": "2515235000010750017",
-    "Year_2_Production": 25519
+    "Year_2_Production": null,
+    "Year_3": null
   },
   {
     "id": "2515235000001027575",
-    "Year_4": 0
-  },
-  {
-    "id": "2515235000092792169",
-    "Year_1_Production": 8458
+    "Year_4": 8996,
+    "Year_5": 10004
   },
   {
     "id": "2515235000001032406",
-    "Year_4": 0
+    "Year_4": 5371,
+    "Year_5": 5064
   },
   {
     "id": "2515235000096950206",
@@ -97,23 +103,27 @@
   },
   {
     "id": "2515235000091855035",
-    "Year_1_Production": 5031
+    "Year_1_Production": null
   },
   {
     "id": "2515235000001032397",
-    "Year_4": 0
+    "Year_4": 7614,
+    "Year_5": 7394
   },
   {
     "id": "2515235000001027581",
-    "Year_4": 5908
+    "Year_4": 5908,
+    "Year_5": 2845
   },
   {
     "id": "2515235000001848048",
-    "Year_4": 1666
+    "Year_4": 1666,
+    "Year_5": 0
   },
   {
     "id": "2515235000039385019",
-    "Year_1_Production": 2225
+    "Year_1_Production": 2225,
+    "Year_2_Production": 0
   },
   {
     "id": "2515235000098176120",
@@ -121,39 +131,47 @@
   },
   {
     "id": "2515235000001027803",
-    "Year_4": 0
+    "Year_4": 13529,
+    "Year_5": 13066
   },
   {
     "id": "2515235000028013047",
-    "Year_2_Production": 6824
+    "Year_2_Production": 6824,
+    "Year_3": 7022
   },
   {
     "id": "2515235000091843012",
-    "Year_1_Production": 7006
+    "Year_1_Production": null
   },
   {
     "id": "2515235000009505120",
-    "Year_3": 5290
+    "Year_3": 5290,
+    "Year_4": 4900,
+    "Year_5": 5031
   },
   {
     "id": "2515235000079495186",
-    "Year_1_Production": 2136
+    "Year_1_Production": null
   },
   {
     "id": "2515235000016779018",
-    "Year_2_Production": 11907
+    "Year_2_Production": null,
+    "Year_3": null
   },
   {
     "id": "2515235000042857001",
-    "Year_2_Production": 11816
+    "Year_2_Production": null
   },
   {
     "id": "2515235000088603130",
-    "Year_1_Production": 12535
+    "Year_1_Production": null
   },
   {
     "id": "2515235000022226037",
-    "Year_1_Production": 6007
+    "Year_1_Production": null,
+    "Year_2_Production": null,
+    "Year_3": null,
+    "Year_4": null
   },
   {
     "id": "2515235000093978344",
@@ -165,19 +183,21 @@
   },
   {
     "id": "2515235000001951011",
-    "Year_4": 0
+    "Year_4": 9840,
+    "Year_5": 9786
   },
   {
     "id": "2515235000028713008",
-    "Year_1_Production": 12324
+    "Year_1_Production": null
   },
   {
     "id": "2515235000019896005",
-    "Year_3": 18555
+    "Year_3": 18555,
+    "Year_4": 18552
   },
   {
     "id": "2515235000062036036",
-    "Year_2_Production": 34890
+    "Year_2_Production": null
   },
   {
     "id": "2515235000047959252",
@@ -189,43 +209,55 @@
   },
   {
     "id": "2515235000001017490",
-    "Year_3": 14209
+    "Year_3": 14209,
+    "Year_4": 14331,
+    "Year_5": 14502
   },
   {
     "id": "2515235000060176036",
-    "Year_1_Production": 6126
+    "Year_1_Production": null,
+    "Year_2_Production": null
   },
   {
     "id": "2515235000010340182",
-    "Year_3": 8854
+    "Year_3": 8854,
+    "Year_4": 8165,
+    "Year_5": 8341
   },
   {
     "id": "2515235000091590016",
-    "Year_1_Production": 8681
+    "Year_1_Production": null
   },
   {
     "id": "2515235000001242152",
-    "Year_4": 0
+    "Year_4": 8010,
+    "Year_5": 7752
   },
   {
     "id": "2515235000019755011",
-    "Year_1_Production": 0
+    "Year_1_Production": null,
+    "Year_2_Production": null,
+    "Year_3": null,
+    "Year_4": null
   },
   {
     "id": "2515235000084294022",
-    "Year_1_Production": 14672
+    "Year_1_Production": null
   },
   {
     "id": "2515235000094076269",
-    "Year_1_Production": 10438
+    "Year_1_Production": null
   },
   {
     "id": "2515235000064405080",
-    "Year_1_Production": 8354
+    "Year_1_Production": 8354,
+    "Year_2_Production": 7693
   },
   {
     "id": "2515235000008170005",
-    "Year_3": 9815
+    "Year_3": 9815,
+    "Year_4": 9053,
+    "Year_5": 9228
   },
   {
     "id": "2515235000096832090",
@@ -233,11 +265,12 @@
   },
   {
     "id": "2515235000065871298",
-    "Year_2_Production": 9543
+    "Year_2_Production": null
   },
   {
     "id": "2515235000057688171",
-    "Year_1_Production": 11410
+    "Year_1_Production": 11410,
+    "Year_2_Production": 11513
   },
   {
     "id": "2515235000042621020",
@@ -245,15 +278,17 @@
   },
   {
     "id": "2515235000046718105",
-    "Year_1_Production": 9343
+    "Year_1_Production": null,
+    "Year_2_Production": null
   },
   {
     "id": "2515235000059931089",
-    "Year_1_Production": 15950
+    "Year_1_Production": null,
+    "Year_2_Production": null
   },
   {
     "id": "2515235000095458502",
-    "Year_1_Production": 8515
+    "Year_1_Production": null
   },
   {
     "id": "2515235000096621284",
@@ -261,19 +296,17 @@
   },
   {
     "id": "2515235000009498017",
-    "Year_3": 4883
+    "Year_3": 4883,
+    "Year_4": 4677,
+    "Year_5": 6364
   },
   {
     "id": "2515235000018047056",
-    "Year_1_Production": 9061
+    "Year_1_Production": null
   },
   {
     "id": "2515235000070925037",
     "Year_1_Production": 11401
-  },
-  {
-    "id": "2515235000089763031",
-    "Year_1_Production": 8845
   },
   {
     "id": "2515235000016340024",
@@ -281,31 +314,41 @@
   },
   {
     "id": "2515235000093989061",
-    "Year_1_Production": 12067
+    "Year_1_Production": null
   },
   {
     "id": "2515235000009345053",
-    "Year_3": 12123
+    "Year_3": 12123,
+    "Year_4": 11335,
+    "Year_5": 6721
   },
   {
     "id": "2515235000018363347",
-    "Year_2_Production": 0
+    "Year_2_Production": 0,
+    "Year_3": 0,
+    "Year_4": 0
   },
   {
     "id": "2515235000019335113",
-    "Year_3": 10582
+    "Year_3": 10582,
+    "Year_4": 10944
   },
   {
     "id": "2515235000058145065",
-    "Year_1_Production": 7791
+    "Year_1_Production": null,
+    "Year_2_Production": null
   },
   {
     "id": "2515235000010014176",
-    "Year_1_Production": 827
+    "Year_1_Production": 827,
+    "Year_3": 5770,
+    "Year_4": 6417,
+    "Year_5": 6454
   },
   {
     "id": "2515235000021124019",
-    "Year_3": 6703
+    "Year_3": 6703,
+    "Year_4": 6599
   },
   {
     "id": "2515235000097338116",
@@ -317,7 +360,8 @@
   },
   {
     "id": "2515235000001022555",
-    "Year_1_Production": 30075
+    "Year_1_Production": 30075,
+    "Year_2_Production": 28717
   },
   {
     "id": "2515235000096546052",
@@ -325,35 +369,47 @@
   },
   {
     "id": "2515235000029977081",
-    "Year_2_Production": 6518
+    "Year_2_Production": null,
+    "Year_3": null
   },
   {
     "id": "2515235000037712043",
-    "Year_1_Production": 6632
+    "Year_1_Production": 6632,
+    "Year_2_Production": 6107,
+    "Year_3": 6129
   },
   {
     "id": "2515235000009534131",
-    "Year_3": 8872
+    "Year_3": 8872,
+    "Year_4": 8590,
+    "Year_5": 8580
   },
   {
     "id": "2515235000093989238",
-    "Year_1_Production": 6777
+    "Year_1_Production": null
   },
   {
     "id": "2515235000009377032",
-    "Year_3": 9665
+    "Year_3": 9665,
+    "Year_4": 5760,
+    "Year_5": 4979
   },
   {
     "id": "2515235000009585011",
-    "Year_3": 8330
+    "Year_3": 8330,
+    "Year_4": 7971,
+    "Year_5": 8011
   },
   {
     "id": "2515235000008106035",
-    "Year_3": 11694
+    "Year_3": null,
+    "Year_4": null,
+    "Year_5": null
   },
   {
     "id": "2515235000041209050",
-    "Year_1_Production": 0
+    "Year_1_Production": null,
+    "Year_2_Production": null
   },
   {
     "id": "2515235000065305054",
@@ -361,11 +417,11 @@
   },
   {
     "id": "2515235000082836254",
-    "Year_1_Production": 82
+    "Year_1_Production": null
   },
   {
     "id": "2515235000065741234",
-    "Year_2_Production": 5152
+    "Year_2_Production": null
   },
   {
     "id": "2515235000080135059",
@@ -373,19 +429,25 @@
   },
   {
     "id": "2515235000039264015",
-    "Year_1_Production": 5478
+    "Year_1_Production": 5478,
+    "Year_2_Production": 8808,
+    "Year_3": 8805
   },
   {
     "id": "2515235000009112092",
-    "Year_3": 7922
+    "Year_3": 7922,
+    "Year_4": 7285,
+    "Year_5": 7497
   },
   {
     "id": "2515235000029203018",
-    "Year_1_Production": 5579
+    "Year_1_Production": 5579,
+    "Year_2_Production": 5145,
+    "Year_3": 5096
   },
   {
     "id": "2515235000043665042",
-    "Year_1_Production": 6699
+    "Year_1_Production": null
   },
   {
     "id": "2515235000095858068",
@@ -405,38 +467,46 @@
   },
   {
     "id": "2515235000095366174",
-    "Year_1_Production": 16999
+    "Year_1_Production": null
   },
   {
     "id": "2515235000052665079",
-    "Year_1_Production": 4112
+    "Year_1_Production": null
   },
   {
     "id": "2515235000087842022",
-    "Year_1_Production": 10130
+    "Year_1_Production": null
   },
   {
     "id": "2515235000038236019",
-    "Year_2_Production": 6698
+    "Year_2_Production": 6698,
+    "Year_3": 6862
   },
   {
     "id": "2515235000010059244",
-    "Year_3": 12594
+    "Year_3": null,
+    "Year_4": null,
+    "Year_5": null
   },
   {
     "id": "2515235000010446537",
-    "Year_3": 8130
+    "Year_3": 8130,
+    "Year_4": 7679,
+    "Year_5": 7847
   },
   {
     "id": "2515235000001027518",
-    "Year_4": 27054
+    "Year_4": 27054,
+    "Year_5": 26599
   },
   {
     "id": "2515235000010172013",
-    "Year_3": 0
+    "Year_3": 0,
+    "Year_4": 11296,
+    "Year_5": 24936
   },
   {
     "id": "2515235000066668125",
-    "Year_2_Production": 0
+    "Year_2_Production": null
   }
 ]

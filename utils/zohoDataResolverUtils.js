@@ -255,7 +255,7 @@ const resolveNeededProductionReportYears = (client) => {
             }
     
             // if the zoho record has null or zero we need to fetch production, otherwise append the old production to the object, this is only really necessary for comparison
-            if(client[yearSelector] == null || client[yearSelector] === 0) {
+            if(client[yearSelector] == null || client[yearSelector] === 0 || client[yearSelector]==="0") {
                 years.push(i)
             } else {
                 client[actualYearSelector] = client[yearSelector]

@@ -32,6 +32,14 @@ const getYearData = async (siteId, productionStartDate, year, monitoring_company
                 { sum: 0, nullAndUndefinedAndZeroCount: 0 },
             );
         }
+        // if(finalSum==null || finalSum.sum===0) {
+        //     console.log(`site: ${siteId} \tstart: ${startDate}`)
+        //     console.log(data)
+        // }
+        // if(siteId==="A_171612" && startDate.includes("2020")) {
+        //     console.log(`site: ${siteId} \tstart: ${startDate}`)
+        //     console.log(data)
+        // }
         return { startDate, endDate, finalSum, siteId, clientName, returnStatus: 'success' }
     } catch (error) {
         console.log(error)
@@ -62,21 +70,6 @@ const fetchData = async (siteId, startDate, endDate, monitoring_company) => {
     
 }
 
-// const getProductionYear = (ptoDate, year) => {
-//     const ptoDateObject = new Date(ptoDate)
-//     const currentDate = new Date()
-//     let startDate = new Date(ptoDate)
-//     let endDate = new Date(ptoDate)
-
-//     startDate.setFullYear(ptoDateObject.getFullYear() + (year - 1))
-//     endDate.setFullYear(ptoDateObject.getFullYear() + year)
-
-//     if (startDate > currentDate || endDate > currentDate) {
-//         throw new Error(`The requested production year is out of bounds\t startDate: ${startDate} -- endDate: ${endDate}`)
-//     }
-
-//     return [startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0]]
-// }
 const getProductionYear = (ptoDate, year) => {
     const ptoDateObject = new Date(ptoDate);
     const currentDate = new Date();

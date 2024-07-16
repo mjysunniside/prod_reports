@@ -7,7 +7,7 @@ const testVerificationData = [
         monitoring: "1762686",
         pto: "2020-02-04",
         startingProdDate:"2020-03-01",
-        production: [4581, 4875, 4280, 1217],
+        production: [4581, 4875, 4280, 1258],
         monitoringType: "enphase"
     },
     {

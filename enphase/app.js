@@ -137,7 +137,7 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
     })
     .then(res => {
       if(res?.data?.production) {
-        console.log("final attempt enphase working")
+        // console.log("final attempt enphase working")
         finalAttempt = res.data.production.map((value, index) => {
           const dateObj = new Date(startDate);
           dateObj.setDate(dateObj.getDate() + index);
@@ -146,7 +146,10 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
             value: (value / 1000)
           }
         })
+        // console.log("production\n", production)
+        // console.log("final", finalAttempt)
       } else {
+        // console.log("failed here...")
         finalAttempt = null
       }
     })
@@ -168,27 +171,6 @@ const fetchAllSitesEnphase = () => {
     .then(res => console.log(res.data))
     .catch(error => console.log(error))
 }
-
-
-// console.log(fetchEnphase(SITE_ID, START_DATE, END_DATE))
-// fetchAllSitesEnphase()
-// refreshEnphase()
-
-// const cartzdafner = {
-//   clientName: "Cartzdafner",
-//   siteId: '2109343',
-//   ptoDate: '2021-02-02',
-//   productionYears: {
-//     1: 8622,
-//     2: null,
-//     3: null
-//   },
-//   monitoring: "enphase"
-// }
-
-// fetchEnphase(cartzdafner.siteId, '2022-02-02', '2023-02-02')
-//   .then(res => console.log(res))
-//   .catch(e => console.log(e))
 
 
 module.exports = { fetchEnphase, fetchAllSitesEnphase }
