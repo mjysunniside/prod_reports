@@ -101,6 +101,7 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
         'Authorization': `Bearer ${access_token}`
       }
     })
+    // console.log(res)
 
     let production = res.data.production.map((value, index) => {
       const dateObj = new Date(startDate);
@@ -130,15 +131,14 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
     json = JSON.parse(fs.readFileSync(filePath))
     access_token = json["access_token"]
     let finalAttempt = null
-    axios.get(MAIN_ENPHASE_REQUEST_URL, {
-      headers: {
-        'Authorization': `Bearer ${access_token}`
-      }
-    })
-    .then(res => {
-      if(res?.data?.production) {
-        // console.log("final attempt enphase working")
-        finalAttempt = res.data.production.map((value, index) => {
+    try {
+      const res2 = await axios.get(MAIN_ENPHASE_REQUEST_URL, {
+        headers: {
+          'Authorization': `Bearer ${access_token}`
+        }
+      })
+      if(res2?.data?.production) {
+        finalAttempt = res2.data.production.map((value, index) => {
           const dateObj = new Date(startDate);
           dateObj.setDate(dateObj.getDate() + index);
           return {
@@ -146,31 +146,39 @@ const fetchEnphase = async (siteId, startDate, endDate, retryCount = 0) => {
             value: (value / 1000)
           }
         })
-        // console.log("production\n", production)
-        // console.log("final", finalAttempt)
-      } else {
-        // console.log("failed here...")
-        finalAttempt = null
       }
-    })
-    .catch(e => {
-      console.log("error in fetch enphase catch block: ", e.message)
-      finalAttempt = null
-    })
-    return finalAttempt
+      return finalAttempt
+    } catch (error) {
+      console.log("Error in enphase second fetch attempt: ", error.message)
+      return null
+    }
   }
 }
 
 const fetchAllSitesEnphase = () => {
-  const access_token = tokens['access_token']
+  let access_token;
+  let json;
+  const currentDir = path.dirname(__filename);
+  const filePath = path.join(currentDir, 'tokens.json');
+  json = JSON.parse(fs.readFileSync(filePath))
+  access_token = json["access_token"]
+  console.log(access_token)
+  
   axios.get(`https://api.enphaseenergy.com/api/v4/systems/?key=${process.env.API_KEY_ENPHASE}`, {
     headers: {
       'Authorization': `Bearer ${access_token}`
     }
   })
-    .then(res => console.log(res.data))
+    .then(res => {
+      console.log(res.data.length)
+      console.log(res.data)
+      
+    })
     .catch(error => console.log(error))
 }
+
+// fetchEnphase("18224", "2023-07-01", "2024-07-01")
+// fetchAllSitesEnphase()
 
 
 module.exports = { fetchEnphase, fetchAllSitesEnphase }

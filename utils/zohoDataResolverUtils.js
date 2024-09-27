@@ -222,7 +222,7 @@ const resolveSunpower = (value) => {
         }
         
     } catch (error) {
-        console.log("Error getting spr id")
+        console.log("Error getting spr id ")
         return null
     }
 }
@@ -241,7 +241,11 @@ const resolveNeededProductionReportYears = (client) => {
     let endDate;
     for(let i=1 ; i <=5 ; i++ ) {
         actualYearSelector = `Year_${i}_Actual_Production`
+        actualYearPerformance = `Year_${i}_Actual_Performance`
+        actualYearNulls = `Year_${i}_Null_Zero_Count`
         client[actualYearSelector] = null
+        client[actualYearPerformance] = null
+        client[actualYearNulls] = null
         if(clientNeedsYears) {
             endDate = new Date(ptoDate)
             endDate.setFullYear(ptoDate.getFullYear()+i)

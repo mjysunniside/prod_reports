@@ -38,4 +38,6 @@ const solaredgeTest = async () => {
     return true
 }
 
+solaredgeTest()
+
 module.exports = {solaredgeTest}

@@ -65,6 +65,8 @@ const getRefresh = async () => {
         } else {
             // response on refresh does not contain refresh (it never updates)
             response.data["refresh_token"] = ZOHO_REFRESH_TOKEN
+            const expirationTime = Date.now() + 3500 * 1000
+            response.data["expiration"] = expirationTime
         }
         fs.writeFileSync(tokenFile, JSON.stringify(response?.data))
         return true
@@ -93,6 +95,7 @@ const getZohoData = async (query) => {
         if(!fs.existsSync(tokenFile)) {
             throw new Error("no existing tokens to complete refresh")
         }
+        const expiration = JSON.parse(fs.readFileSync(tokenFile))["expiration"]
         const ZOHO_ACCESS_TOKEN = JSON.parse(fs.readFileSync(tokenFile))["access_token"]
         const api_domain = "https://www.zohoapis.com"
         const sql_request_url = `${api_domain}/crm/v6/coql`
@@ -252,6 +255,8 @@ const firstDateOfMonth = () => {
 // returns the PREVIOUS months sites with pto in that month (or null)
 const getPtoMonthData = async () => {
     const targetDate = targetMonth()
+    // temp to set date manually
+    // const targetDate = new Date("2024-04-30")
     const targetDateIsoString = targetDate.toISOString()
     const targetDateString = targetDateIsoString.split('T')[0]
 
@@ -270,8 +275,11 @@ const getPtoMonthData = async () => {
         
         const resultFilterForPtoMonth = result.filter(site => {
             const ptoDate = new Date(site["PTO_Date"])
-            return ptoDate.getMonth() === targetDate.getMonth() && ptoDate.getFullYear()<=targetDate.getFullYear()-1
+            return ptoDate.getUTCMonth() === targetDate.getUTCMonth() && ptoDate.getUTCFullYear()<=targetDate.getUTCFullYear()-1
         })
+        // fs.writeFileSync("./data/temp.json", JSON.stringify(resultFilterForPtoMonth))
+        // console.log(`about to exits. Here is target month: ${targetDate.getMonth()}`)
+        // process.exit()
         return resultFilterForPtoMonth
     } catch (error) {
         console.log("Error in getPtoMonthData", error.message)
